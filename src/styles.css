@@ -1,0 +1,57 @@
+*{box-sizing:border-box}body{margin:0;font-family:'DM Sans',sans-serif;color:#102044}h1,h2,h3,.brand{font-family:'Manrope',sans-serif}.hero-grid{background-image:radial-gradient(rgba(255,255,255,.14) 1px,transparent 1px);background-size:24px 24px}.glass{background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.16);backdrop-filter:blur(12px)}.rise{animation:rise .7s ease both}@keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}.ticker{scrollbar-width:none}.ticker::-webkit-scrollbar{display:none}.navlink{transition:color .2s}.navlink:hover{color:#2875e8}.coin-icon{display:grid;place-items:center;width:40px;height:40px;border-radius:14px;font-weight:800}.hidden-menu{display:none}
+.site-toolbar{position:fixed;right:18px;top:88px;z-index:60;display:flex;align-items:center;gap:8px;padding:7px;background:rgba(255,255,255,.94);border:1px solid #dce5f4;border-radius:15px;box-shadow:0 8px 28px rgba(6,23,71,.13);backdrop-filter:blur(14px)}.toolbar-label{font-size:11px;font-weight:700;color:#53627a;padding:0 5px}.theme-toggle,.currency-toggle{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:0;border-radius:10px;padding:9px 11px;font-size:12px;font-weight:800;cursor:pointer;background:#e8f0ff;color:#082d78;white-space:nowrap}.currency-toggle{background:#082d78;color:white}.toast-message{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:100;background:#061747;color:white;padding:12px 20px;border-radius:12px;box-shadow:0 12px 35px #06174730;font-size:14px;font-weight:700;max-width:90vw}.market-card{min-width:0}
+html[data-theme="dark"] body{background:#071225!important;color:#e5edff}html[data-theme="dark"] header,html[data-theme="dark"] footer,html[data-theme="dark"] #services,html[data-theme="dark"] #contact{background:#0b1830!important;border-color:#203250!important}html[data-theme="dark"] #markets,html[data-theme="dark"] #learn,html[data-theme="dark"] #about{color:#e5edff}html[data-theme="dark"] #markets h2,html[data-theme="dark"] #learn h2,html[data-theme="dark"] #about h2,html[data-theme="dark"] #services h2,html[data-theme="dark"] #services h3,html[data-theme="dark"] #about h3,html[data-theme="dark"] #learn h3,html[data-theme="dark"] footer a,html[data-theme="dark"] footer span{color:#e5edff!important}html[data-theme="dark"] #markets .bg-white,html[data-theme="dark"] #learn .bg-white,html[data-theme="dark"] #about .bg-white,html[data-theme="dark"] #services article,html[data-theme="dark"] #services .bg-white{background:#101f39!important;border-color:#263956!important;color:#e5edff}html[data-theme="dark"] #markets .text-slate-500,html[data-theme="dark"] #learn .text-slate-500,html[data-theme="dark"] #about .text-slate-600,html[data-theme="dark"] #services .text-slate-500{color:#a9b8d0!important}html[data-theme="dark"] #learn .bg-blue-50,html[data-theme="dark"] #learn .bg-blue-50\/70{background:#10284a!important}html[data-theme="dark"] #about .bg-bluechip-100{background:#10284a!important}html[data-theme="dark"] .site-toolbar{background:rgba(10,24,46,.96);border-color:#304564}html[data-theme="dark"] .toolbar-label{color:#b6c7e1}html[data-theme="dark"] .theme-toggle{background:#203653;color:#eaf2ff}html[data-theme="dark"] .market-card .market-price{color:#f2f6ff!important}html[data-theme="dark"] .market-card .text-slate-400{color:#9bacc7!important}
+@media(max-width:640px){.site-toolbar{top:74px;right:10px;gap:5px;padding:5px}.toolbar-label{display:none}.theme-toggle,.currency-toggle{padding:8px;font-size:11px}.site-toolbar span{white-space:nowrap}}
+
+/* Dark-mode readability: convert brand-blue typography to light text while preserving the light theme unchanged. */
+html[data-theme="dark"] .text-bluechip-950,
+html[data-theme="dark"] .text-bluechip-900,
+html[data-theme="dark"] .text-bluechip-800,
+html[data-theme="dark"] #markets .text-bluechip-700,
+html[data-theme="dark"] #learn .text-bluechip-700,
+html[data-theme="dark"] #about .text-bluechip-700,
+html[data-theme="dark"] #services .text-bluechip-700,
+html[data-theme="dark"] #contact .text-bluechip-950,
+html[data-theme="dark"] .brand,
+html[data-theme="dark"] header .brand span,
+html[data-theme="dark"] #gainers .text-bluechip-950,
+html[data-theme="dark"] #losers .text-bluechip-950 {
+  color: #f4f7ff !important;
+}
+html[data-theme="dark"] #gainers,
+html[data-theme="dark"] #losers,
+html[data-theme="dark"] #gainers *,
+html[data-theme="dark"] #losers * {
+  --tw-border-opacity: 1;
+}
+html[data-theme="dark"] #gainers .border-slate-100,
+html[data-theme="dark"] #losers .border-slate-100 {
+  border-color: #263956 !important;
+}
+html[data-theme="dark"] header .text-slate-500,
+html[data-theme="dark"] header .text-slate-600,
+html[data-theme="dark"] #learn .text-bluechip-600,
+html[data-theme="dark"] #markets .text-bluechip-600,
+html[data-theme="dark"] #about .text-bluechip-600,
+html[data-theme="dark"] #services .text-bluechip-600 {
+  color: #e4edff !important;
+}
+
+/* ── Best Customer of the Week Banner ── */
+.cw-banner{display:flex;align-items:center;gap:14px;background:linear-gradient(90deg,#0b1f50,#1a3a8c);color:#fff;padding:14px 24px;font-family:'DM Sans',sans-serif}
+.cw-star{font-size:28px;flex-shrink:0}
+.cw-title{font-weight:800;font-size:13px;letter-spacing:.05em;text-transform:uppercase;color:#93c5fd}
+.cw-quote{font-size:14px;color:#e0eaff;margin-top:2px}
+/* ── Charts Section ── */
+.charts-section{background:#f7f9fd;border-top:1px solid #e2e8f0}
+html[data-theme="dark"] .charts-section{background:#0b1830;border-color:#1e3354}
+html[data-theme="dark"] .charts-section h2{color:#e5edff}
+html[data-theme="dark"] .charts-section .text-bluechip-950{color:#e5edff!important}
+/* ── Asset Chart Card ── */
+.asset-chart{background:#0f1f3d;border:1px solid rgba(255,255,255,.10);border-radius:18px;padding:18px;box-shadow:0 8px 28px rgba(6,23,71,.18)}
+html[data-theme="light"] .asset-chart{background:#1a2f5e}
+/* ── Team Section ── */
+.team-section{background:#061747;color:#fff}
+.team-card{display:flex;align-items:center;gap:14px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:18px}
+.team-avatar{width:46px;height:46px;border-radius:14px;background:#2563eb;color:#fff;display:grid;place-items:center;font-weight:800;font-size:20px;flex-shrink:0}
+.team-quote{border-left:3px solid #3b82f6;padding:14px 20px;color:#93c5fd;font-style:italic;font-size:15px;line-height:1.7;background:rgba(255,255,255,.04);border-radius:0 12px 12px 0}
