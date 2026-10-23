@@ -55,3 +55,114 @@ html[data-theme="light"] .asset-chart{background:#1a2f5e}
 .team-card{display:flex;align-items:center;gap:14px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:18px}
 .team-avatar{width:46px;height:46px;border-radius:14px;background:#2563eb;color:#fff;display:grid;place-items:center;font-weight:800;font-size:20px;flex-shrink:0}
 .team-quote{border-left:3px solid #3b82f6;padding:14px 20px;color:#93c5fd;font-style:italic;font-size:15px;line-height:1.7;background:rgba(255,255,255,.04);border-radius:0 12px 12px 0}
+
+/* ── Coin scroll strip (mobile = swipe, desktop = normal grid) ── */
+.coin-scroll-wrap{margin-left:-1rem;margin-right:-1rem;padding:0 1rem}
+.coin-scroll-track{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;padding-bottom:10px;scrollbar-width:none}
+.coin-scroll-track::-webkit-scrollbar{display:none}
+.coin-scroll-card{flex:0 0 160px;scroll-snap-align:start;min-width:0}
+
+/* On sm+ screens switch to a 5-column grid – no scrolling */
+@media(min-width:640px){
+  .coin-scroll-wrap{margin:0;padding:0}
+  .coin-scroll-track{display:grid;grid-template-columns:repeat(5,1fr);overflow:visible;padding-bottom:0}
+  .coin-scroll-card{flex:none;width:auto}
+}
+
+/* Better touch targets for gainer/loser rows on mobile */
+#gainers .flex, #losers .flex{padding-top:12px;padding-bottom:12px;min-height:48px}
+
+/* Dark mode adjustments for new market header */
+html[data-theme="dark"] #markets .text-slate-500{color:#a9b8d0!important}
+html[data-theme="dark"] #markets .border-slate-200{border-color:#263956!important}
+html[data-theme="dark"] #markets .text-bluechip-800{color:#93c5fd!important}
+
+/* ── CoinMarketCap Section Styling & Dark Mode ── */
+.cmc-section { position: relative; }
+.cmc-table-wrapper {
+  transition: all 0.2s ease;
+}
+.cmc-table-row {
+  transition: background-color 0.15s ease;
+}
+
+html[data-theme="dark"] .cmc-highlight-card {
+  background: #0f1f3d !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+html[data-theme="dark"] .cmc-highlight-card .text-bluechip-950 {
+  color: #ffffff !important;
+}
+html[data-theme="dark"] .coin-scroll-card {
+  background: #0f1f3d !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+html[data-theme="dark"] .coin-scroll-card .text-bluechip-950 {
+  color: #ffffff !important;
+}
+html[data-theme="dark"] .cmc-highlight-card .bg-amber-50 {
+  background: rgba(245, 158, 11, 0.15) !important;
+}
+html[data-theme="dark"] .cmc-highlight-card .bg-emerald-50 {
+  background: rgba(16, 185, 129, 0.15) !important;
+}
+html[data-theme="dark"] .cmc-highlight-card .bg-rose-50 {
+  background: rgba(244, 63, 94, 0.15) !important;
+}
+
+html[data-theme="dark"] .cmc-table-wrapper {
+  background: #0d1b36 !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3) !important;
+}
+html[data-theme="dark"] .cmc-table-wrapper thead tr {
+  background: #091428 !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+html[data-theme="dark"] .cmc-table-wrapper thead th {
+  color: #8da4c4 !important;
+}
+html[data-theme="dark"] .cmc-table-wrapper tbody tr {
+  border-color: rgba(255, 255, 255, 0.06) !important;
+}
+html[data-theme="dark"] .cmc-table-wrapper tbody tr:hover {
+  background: rgba(255, 255, 255, 0.04) !important;
+}
+html[data-theme="dark"] .cmc-table-wrapper .text-bluechip-950 {
+  color: #f1f5f9 !important;
+}
+html[data-theme="dark"] .cmc-table-wrapper .text-slate-600,
+html[data-theme="dark"] .cmc-table-wrapper .text-slate-700 {
+  color: #cbd5e1 !important;
+}
+html[data-theme="dark"] .cmc-table-wrapper .bg-slate-100 {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #94a3b8 !important;
+}
+html[data-theme="dark"] .cmc-table-wrapper .bg-bluechip-50 {
+  background: rgba(59, 130, 246, 0.15) !important;
+  color: #60a5fa !important;
+}
+html[data-theme="dark"] .cmc-table-wrapper .bg-bluechip-50:hover {
+  background: #2563eb !important;
+  color: #ffffff !important;
+}
+html[data-theme="dark"] .cmc-table-wrapper > div:last-child {
+  background: #091428 !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+html[data-theme="dark"] .cmc-section input {
+  background: #0f1f3d !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  color: #ffffff !important;
+}
+html[data-theme="dark"] .cmc-section button.bg-white {
+  background: #0f1f3d !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  color: #cbd5e1 !important;
+}
+html[data-theme="dark"] .cmc-section button.bg-white:hover {
+  background: #172a52 !important;
+}
+html[data-theme="dark"] #markets .border-slate-200{border-color:#263956!important}
+html[data-theme="dark"] #markets .text-bluechip-800{color:#93c5fd!important}
