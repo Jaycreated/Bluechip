@@ -81,7 +81,11 @@ function App() {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col bg-white text-slate-800 transition-colors duration-200">
+    <div
+      className={`min-h-screen flex flex-col transition-colors duration-200 ${
+        theme === 'dark' ? 'bg-[#071225] text-slate-200' : 'bg-white text-slate-800'
+      }`}
+    >
       {/* ── Nigeria Crypto Top Ribbon ── */}
       <div className="bg-bluechip-950 text-white text-xs py-2 px-4 border-b border-white/5">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
@@ -120,7 +124,11 @@ function App() {
       </div>
 
       {/* ── Main Persistent Header ── */}
-      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-xl border-b border-slate-100 shadow-2xs">
+      <header
+        className={`sticky top-0 z-50 backdrop-blur-xl border-b transition-colors duration-200 ${
+          theme === 'dark' ? 'bg-[#0b1830]/95 border-slate-700 shadow-lg' : 'bg-white/95 border-slate-100 shadow-2xs'
+        }`}
+      >
         <nav className="max-w-7xl mx-auto px-4 py-3.5 flex items-center justify-between">
           {/* Logo & Brand */}
           <button
@@ -296,7 +304,11 @@ function App() {
       </main>
 
       {/* ── Shared Persistent Footer ── */}
-      <footer className="bg-white border-t border-slate-100 mt-auto">
+      <footer
+        className={`mt-auto border-t transition-colors duration-200 ${
+          theme === 'dark' ? 'bg-[#0b1830] border-slate-700' : 'bg-white border-slate-100'
+        }`}
+      >
         <div className="max-w-7xl mx-auto px-4 py-12">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-10">
             {/* Col 1 */}

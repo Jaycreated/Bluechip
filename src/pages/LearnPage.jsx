@@ -156,7 +156,7 @@ export default function LearnPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 py-14">
       {/* ── Page Header & Progress ── */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-10 border-b border-slate-100 mb-12">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 p-10 border-b border-slate-100 mb-12 rounded-2xl">
         <div>
           <p className="text-bluechip-600 uppercase tracking-[.18em] text-xs font-extrabold">Bluechip Academy</p>
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-bluechip-950 mt-2">
