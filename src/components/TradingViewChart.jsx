@@ -176,19 +176,16 @@ function TradingViewChart({ theme = 'dark', initialSymbol = 'BINANCE:BTCUSDT' })
       </div>
 
       {/* ── Terminal Footer Info ── */}
-      <div className="px-5 py-3 bg-slate-950/90 border-t border-slate-800/80 flex flex-wrap items-center justify-between text-[11px] text-slate-400">
-        <div className="flex items-center gap-4">
-          <span className="flex items-center gap-1.5 text-slate-300 font-medium">
-            <ShieldCheck size={14} className="text-emerald-400" />
-            Official TradingView Advanced Charting Engine
-          </span>
-          <span className="hidden md:inline text-slate-500">•</span>
-          <span className="hidden md:inline text-slate-400">
-            Use the symbol search bar inside the chart to view any token, stock, or index.
+      <div className="px-3 py-2 sm:px-5 sm:py-3 bg-slate-950/90 border-t border-slate-800/80 flex items-center justify-between gap-2 text-[10px] sm:text-[11px] text-slate-400">
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="flex items-center gap-1.5 text-slate-300 font-medium whitespace-nowrap">
+            <ShieldCheck size={12} className="text-emerald-400 sm:w-[14px] sm:h-[14px]" />
+            <span className="truncate">Official TradingView Charting Engine</span>
           </span>
         </div>
-        <div className="flex items-center gap-3">
-          <span className="text-slate-400">Timezone: UTC</span>
+        <div className="flex items-center gap-2 shrink-0">
+          <span className="hidden sm:inline text-slate-500">•</span>
+          <span className="text-slate-400 whitespace-nowrap">UTC</span>
         </div>
       </div>
     </div>

@@ -32,10 +32,17 @@
     min-width: 0;
     overflow-x: auto;
     overflow-y: hidden;
+    padding-top: 0.125rem;
   }
 
   .chart-scroll-shell::-webkit-scrollbar {
     display: none;
+  }
+
+  .tradingview-pro-wrapper .tradingview-widget-container,
+  .tradingview-pro-wrapper .tradingview-widget-container__widget,
+  .tradingview-pro-wrapper iframe {
+    min-width: 0 !important;
   }
 
   .tradingview-pro-wrapper .tradingview-widget-container__widget {
