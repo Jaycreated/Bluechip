@@ -29,8 +29,9 @@ function TradingViewChart({ theme = 'dark', initialSymbol = 'BINANCE:BTCUSDT' })
 
     const widgetDiv = document.createElement('div');
     widgetDiv.className = 'tradingview-widget-container__widget';
-    widgetDiv.style.height = 'calc(100% - 32px)';
+    widgetDiv.style.height = '100%';
     widgetDiv.style.width = '100%';
+    widgetDiv.style.maxWidth = '100%';
     widgetContainer.appendChild(widgetDiv);
 
     const script = document.createElement('script');
@@ -77,29 +78,29 @@ function TradingViewChart({ theme = 'dark', initialSymbol = 'BINANCE:BTCUSDT' })
       isFullscreen
         ? 'fixed inset-0 z-50 bg-slate-950 p-4 flex flex-col'
         : 'bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl'
-    }`}>
+    }`} style={{ width: '100%', maxWidth: '100%', margin: '0 auto' }}>
       {/* ── TradingView Pro Header Bar ── */}
-      <div className="p-4 sm:p-5 border-b border-slate-800 bg-slate-900/90 backdrop-blur-md flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400 font-bold">
-            <BarChart2 size={20} />
+      <div className="p-3 sm:p-5 border-b border-slate-800 bg-slate-900/90 backdrop-blur-md flex flex-wrap items-center justify-between gap-2 sm:gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400 font-bold">
+            <BarChart2 size={16} className="sm:w-[20px] sm:h-[20px]" />
           </div>
           <div>
-            <div className="flex items-center gap-2">
-              <h3 className="font-extrabold text-white text-base sm:text-lg flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h3 className="font-extrabold text-white text-sm sm:text-lg flex items-center gap-2">
                 TradingView Advanced Real-Time Terminal
               </h3>
-              <span className="text-[10px] font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full">
-                Live Feed
+              <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-1.5 sm:px-2 py-0.5 rounded-full">
+                LIVE
               </span>
             </div>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <p className="hidden sm:block text-xs text-slate-400 mt-0.5 max-w-xl">
               Full technical analysis suite with candlesticks, indicators, drawing tools &amp; instant symbol search
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2">
           <a
             href="https://www.tradingview.com/chart/"
             target="_blank"
@@ -110,16 +111,16 @@ function TradingViewChart({ theme = 'dark', initialSymbol = 'BINANCE:BTCUSDT' })
           </a>
           <button
             onClick={() => setIsFullscreen(!isFullscreen)}
-            className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 border border-slate-700 px-3.5 py-2 rounded-xl transition cursor-pointer"
+            className="inline-flex items-center gap-1.5 text-[11px] sm:text-xs font-bold text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 border border-slate-700 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl transition cursor-pointer"
             title={isFullscreen ? 'Exit Fullscreen' : 'Expand to Fullscreen'}
           >
             {isFullscreen ? (
               <>
-                <Minimize2 size={15} /> Exit Fullscreen
+                <Minimize2 size={14} className="sm:w-[15px] sm:h-[15px]" /> <span className="hidden xs:inline">Exit</span>
               </>
             ) : (
               <>
-                <Maximize2 size={15} /> Fullscreen
+                <Maximize2 size={14} className="sm:w-[15px] sm:h-[15px]" /> <span className="hidden xs:inline">Full</span>
               </>
             )}
           </button>
@@ -127,35 +128,50 @@ function TradingViewChart({ theme = 'dark', initialSymbol = 'BINANCE:BTCUSDT' })
       </div>
 
       {/* ── Quick Crypto Symbol Selector Pills ── */}
-      <div className="px-4 py-3 bg-slate-950/70 border-b border-slate-800 flex items-center gap-2 overflow-x-auto scrollbar-none">
-        <span className="text-[11px] font-bold text-slate-400 shrink-0 uppercase tracking-wider flex items-center gap-1 mr-1">
-          <TrendingUp size={13} className="text-blue-400" /> Quick Pairs:
+      <div className="px-3 sm:px-4 py-2 sm:py-3 bg-slate-950/70 border-b border-slate-800 flex items-center gap-2 overflow-x-auto scrollbar-none">
+        <span className="text-[10px] sm:text-[11px] font-bold text-slate-400 shrink-0 uppercase tracking-wider flex items-center gap-1 mr-0.5 sm:mr-1">
+          <TrendingUp size={12} className="text-blue-400" /> Quick Pairs:
         </span>
         {POPULAR_SYMBOLS.map((item) => (
           <button
             key={item.symbol}
             onClick={() => setSelectedSymbol(item.symbol)}
-            className={`px-3 py-1.5 rounded-xl text-xs font-extrabold transition cursor-pointer shrink-0 flex items-center gap-1.5 ${
+            className={`px-2.5 py-1.5 sm:px-3 sm:py-1.5 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-extrabold transition cursor-pointer shrink-0 flex items-center gap-1.5 ${
               selectedSymbol === item.symbol
                 ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
                 : 'bg-slate-800/80 text-slate-300 hover:bg-slate-750 hover:text-white border border-slate-750'
             }`}
           >
             <span className="opacity-70">{item.icon}</span>
-            <span>{item.label}</span>
+            <span className="whitespace-nowrap">{item.label}</span>
           </button>
         ))}
       </div>
 
       {/* ── Chart Container with True TradingView Canvas ── */}
       <div
-        className="w-full relative"
-        style={{ height: isFullscreen ? 'calc(100vh - 140px)' : '650px' }}
+        className="chart-scroll-shell w-full relative"
+        style={{
+          height: isFullscreen ? 'calc(100vh - 140px)' : '420px',
+          minHeight: '320px',
+          width: '100%',
+          maxWidth: '100%',
+          overflowX: 'auto',
+          overflowY: 'hidden',
+          WebkitOverflowScrolling: 'touch',
+          scrollbarWidth: 'none',
+        }}
       >
         <div
           ref={containerRef}
           className="w-full h-full"
-          style={{ width: '100%', height: '100%' }}
+          style={{
+            width: isFullscreen ? '100%' : '860px',
+            minWidth: isFullscreen ? '100%' : '860px',
+            height: '100%',
+            maxWidth: 'none',
+            overflow: 'hidden',
+          }}
         />
       </div>
 

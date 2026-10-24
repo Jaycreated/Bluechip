@@ -57,6 +57,39 @@ function App() {
     };
   }, []);
 
+  // Scroll reveal animation for sections and cards
+  useEffect(() => {
+    const revealTargets = document.querySelectorAll('section, article, .glass, .team-card, .coin-scroll-card, .asset-chart, .cmc-table-wrapper, .market-card, .feature-card, .info-card, .stat-card');
+
+    if (!revealTargets.length) return;
+
+    revealTargets.forEach((el, index) => {
+      if (!el.classList.contains('scroll-reveal')) {
+        el.classList.add('scroll-reveal');
+        el.style.setProperty('--reveal-delay', `${index * 60}ms`);
+      }
+    });
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      {
+        threshold: 0.12,
+        rootMargin: '0px 0px -30px 0px',
+      }
+    );
+
+    revealTargets.forEach((el) => observer.observe(el));
+
+    return () => observer.disconnect();
+  }, [currentPage, theme, currency]);
+
   const navigate = (page) => {
     // Start fade-out animation
     setIsAnimating(true);
