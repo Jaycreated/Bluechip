@@ -17,6 +17,31 @@ import {
   Send 
 } from 'lucide-react';
 
+const makeFallbackToken = (symbol = 'CRYPTO') => {
+  const text = String(symbol).toUpperCase().slice(0, 2) || 'CR';
+  const palette = {
+    BTC: '#f59e0b',
+    ETH: '#627eea',
+    SOL: '#14f1d9',
+    BNB: '#f3ba2f',
+    USDT: '#26a17b',
+    XRP: '#2e8cff',
+    DOGE: '#f4c20d',
+    PEPE: '#7c3aed',
+    WLD: '#06b6d4',
+    TIA: '#f97316',
+    DEFAULT: '#2563eb'
+  };
+  const fill = palette[String(symbol).toUpperCase()] || palette.DEFAULT;
+  const svg = `
+    <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'>
+      <rect width='64' height='64' rx='18' fill='${fill}'/>
+      <text x='50%' y='54%' text-anchor='middle' font-size='24' font-weight='700' fill='white' font-family='Arial, sans-serif'>${text}</text>
+    </svg>
+  `;
+  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+};
+
 const PREVIEW_FALLBACK_COINS = [
   { id: 'bitcoin', symbol: 'BTC', name: 'Bitcoin', price: 96800, change: 4.15, icon: 'https://assets.coingecko.com/coins/images/1/large/bitcoin.png' },
   { id: 'ethereum', symbol: 'ETH', name: 'Ethereum', price: 2795, change: 3.20, icon: 'https://assets.coingecko.com/coins/images/279/large/ethereum.png' },
@@ -300,7 +325,7 @@ export default function HomePage({ onNavigate, currency = 'usd' }) {
                     className="w-8 h-8 rounded-full object-contain shrink-0"
                     onError={(e) => {
                       e.target.onerror = null;
-                      e.target.src = 'https://assets.coingecko.com/coins/images/1/large/bitcoin.png';
+                      e.target.src = makeFallbackToken(c.symbol || c.name);
                     }}
                   />
                   <div className="truncate">
@@ -347,7 +372,15 @@ export default function HomePage({ onNavigate, currency = 'usd' }) {
               {PREVIEW_GAINERS.map((g) => (
                 <div key={g.symbol} className="py-2.5 flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
-                    <img src={g.icon} alt={g.name} className="w-6 h-6 rounded-full" />
+                    <img
+                      src={g.icon}
+                      alt={g.name}
+                      className="w-6 h-6 rounded-full"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = makeFallbackToken(g.symbol || g.name);
+                      }}
+                    />
                     <span className="font-extrabold text-xs text-bluechip-950">{g.name} ({g.symbol})</span>
                   </div>
                   <div className="text-right">
@@ -379,7 +412,15 @@ export default function HomePage({ onNavigate, currency = 'usd' }) {
               {PREVIEW_LOSERS.map((l) => (
                 <div key={l.symbol} className="py-2.5 flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
-                    <img src={l.icon} alt={l.name} className="w-6 h-6 rounded-full" />
+                    <img
+                      src={l.icon}
+                      alt={l.name}
+                      className="w-6 h-6 rounded-full"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = makeFallbackToken(l.symbol || l.name);
+                      }}
+                    />
                     <span className="font-extrabold text-xs text-bluechip-950">{l.name} ({l.symbol})</span>
                   </div>
                   <div className="text-right">

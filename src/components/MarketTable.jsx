@@ -4,6 +4,31 @@ import { Search, TrendingUp, TrendingDown, RefreshCw, Flame, ArrowUpRight, Arrow
 const CACHE_KEY = 'bluechip_cmc_market_data_v2';
 const CACHE_TTL = 3 * 60 * 1000; // 3 minutes cache
 
+function getFallbackCoinImage(symbol = 'CRYPTO') {
+  const text = String(symbol).toUpperCase().slice(0, 2) || 'CR';
+  const palette = {
+    BTC: '#f59e0b',
+    ETH: '#627eea',
+    SOL: '#14f1d9',
+    BNB: '#f3ba2f',
+    USDT: '#26a17b',
+    XRP: '#2e8cff',
+    DOGE: '#f4c20d',
+    PEPE: '#7c3aed',
+    WLD: '#06b6d4',
+    TIA: '#f97316',
+    DEFAULT: '#2563eb'
+  };
+  const fill = palette[String(symbol).toUpperCase()] || palette.DEFAULT;
+  const svg = `
+    <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'>
+      <rect width='64' height='64' rx='18' fill='${fill}'/>
+      <text x='50%' y='54%' text-anchor='middle' font-size='24' font-weight='700' fill='white' font-family='Arial, sans-serif'>${text}</text>
+    </svg>
+  `;
+  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+}
+
 // 25+ realistic default coins (both big gainers and losers) for instant and fallback rendering
 const FALLBACK_COINS = [
   // Big Gainers
@@ -118,7 +143,7 @@ function Sparkline({ data, isPositive }) {
 }
 
 // Dedicated Ranked Mini-Table for Gainers or Losers
-function Top10Card({ title, icon, subtitle, coins, type = 'gainer', currency }) {
+function Top10Card({ title, icon, subtitle, coins, type = 'gainer', currency, onCoinSelect }) {
   const isGainer = type === 'gainer';
   const headerBg = isGainer ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' : 'bg-rose-500/10 text-rose-600 border-rose-500/20';
   const badgeColor = isGainer ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200';
@@ -171,7 +196,8 @@ function Top10Card({ title, icon, subtitle, coins, type = 'gainer', currency }) 
             return (
               <div
                 key={coin.id}
-                className="py-2.5 flex items-center justify-between gap-3 hover:bg-slate-50/70 px-2 rounded-xl transition group"
+                onClick={() => onCoinSelect?.(coin)}
+                className="py-2.5 flex items-center justify-between gap-3 hover:bg-slate-50/70 px-2 rounded-xl transition group cursor-pointer"
               >
                 {/* Left: Rank & Coin info */}
                 <div className="flex items-center gap-3 min-w-0">
@@ -184,7 +210,7 @@ function Top10Card({ title, icon, subtitle, coins, type = 'gainer', currency }) 
                     className="w-7 h-7 rounded-full object-contain shrink-0 shadow-2xs"
                     onError={(e) => {
                       e.target.onerror = null;
-                      e.target.src = 'https://assets.coingecko.com/coins/images/1/large/bitcoin.png';
+                      e.target.src = getFallbackCoinImage(coin.symbol || coin.name);
                     }}
                   />
                   <div className="truncate">
@@ -217,6 +243,7 @@ function Top10Card({ title, icon, subtitle, coins, type = 'gainer', currency }) 
                     href={tradeLink}
                     target="_blank"
                     rel="noopener noreferrer"
+                    onClick={(event) => event.stopPropagation()}
                     className="hidden sm:inline-flex items-center px-2.5 py-1 text-[11px] font-bold rounded-lg bg-bluechip-50 text-bluechip-700 hover:bg-bluechip-600 hover:text-white transition shadow-2xs"
                     title={`Trade ${coin.symbol.toUpperCase()}`}
                   >
@@ -237,7 +264,7 @@ function Top10Card({ title, icon, subtitle, coins, type = 'gainer', currency }) 
   );
 }
 
-export default function MarketTable({ currency = 'usd', onCurrencyToggle, onSparklinesUpdate }) {
+export default function MarketTable({ currency = 'usd', onCurrencyToggle, onSparklinesUpdate, onCoinSelect }) {
   const [coins, setCoins] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -465,7 +492,8 @@ export default function MarketTable({ currency = 'usd', onCurrencyToggle, onSpar
               return (
                 <div
                   key={coin.id}
-                  className="coin-scroll-card bg-white border border-slate-200/80 rounded-2xl p-4 shadow-xs hover:shadow-soft transition flex flex-col justify-between"
+                  onClick={() => onCoinSelect?.(coin)}
+                  className="coin-scroll-card bg-white border border-slate-200/80 rounded-2xl p-4 shadow-xs hover:shadow-soft transition flex flex-col justify-between cursor-pointer"
                 >
                   <div className="flex items-center gap-2.5">
                     <img
@@ -474,7 +502,7 @@ export default function MarketTable({ currency = 'usd', onCurrencyToggle, onSpar
                       className="w-8 h-8 rounded-full object-contain shrink-0 shadow-2xs"
                       onError={(e) => {
                         e.target.onerror = null;
-                        e.target.src = 'https://assets.coingecko.com/coins/images/1/large/bitcoin.png';
+                        e.target.src = getFallbackCoinImage(coin.symbol || coin.name);
                       }}
                     />
                     <div className="truncate">
@@ -544,6 +572,7 @@ export default function MarketTable({ currency = 'usd', onCurrencyToggle, onSpar
               coins={top100Gainers}
               type="gainer"
               currency={currency}
+              onCoinSelect={onCoinSelect}
             />
           )}
 
@@ -556,6 +585,7 @@ export default function MarketTable({ currency = 'usd', onCurrencyToggle, onSpar
               coins={top100Losers}
               type="loser"
               currency={currency}
+              onCoinSelect={onCoinSelect}
             />
           )}
         </div>
@@ -688,7 +718,8 @@ export default function MarketTable({ currency = 'usd', onCurrencyToggle, onSpar
                   return (
                     <tr
                       key={coin.id}
-                      className="cmc-table-row hover:bg-slate-50/80 transition group"
+                      onClick={() => onCoinSelect?.(coin)}
+                      className="cmc-table-row hover:bg-slate-50/80 transition group cursor-pointer"
                     >
                       {/* Rank */}
                       <td className="py-3.5 px-4 text-center font-bold text-slate-400 text-xs">
@@ -696,7 +727,7 @@ export default function MarketTable({ currency = 'usd', onCurrencyToggle, onSpar
                       </td>
 
                       {/* Name & Icon */}
-                      <td className="py-3.5 px-4">
+                      <td className="py-3.5 px-4" onClick={() => onCoinSelect?.(coin)}>
                         <div className="flex items-center gap-3">
                           <img
                             src={coin.image}
@@ -704,7 +735,7 @@ export default function MarketTable({ currency = 'usd', onCurrencyToggle, onSpar
                             className="w-7 h-7 rounded-full object-contain shrink-0 shadow-2xs"
                             onError={(e) => {
                               e.target.onerror = null;
-                              e.target.src = 'https://assets.coingecko.com/coins/images/1/large/bitcoin.png';
+                              e.target.src = getFallbackCoinImage(coin.symbol || coin.name);
                             }}
                           />
                           <div>
@@ -778,6 +809,7 @@ export default function MarketTable({ currency = 'usd', onCurrencyToggle, onSpar
                           href={tradeLink}
                           target="_blank"
                           rel="noopener noreferrer"
+                          onClick={(event) => event.stopPropagation()}
                           className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-extrabold bg-bluechip-50 text-bluechip-700 hover:bg-bluechip-600 hover:text-white transition shadow-2xs"
                         >
                           Trade <ArrowUpRight size={12} />
