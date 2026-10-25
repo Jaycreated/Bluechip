@@ -57,32 +57,71 @@ export default function HomePage({ onNavigate, currency = 'usd' }) {
   const [coins, setCoins] = useState(PREVIEW_FALLBACK_COINS);
   const [selectedTradeAsset, setSelectedTradeAsset] = useState('USDT');
 
-  // Load latest cached market data if available
+  // Keep the homepage preview in sync with the same live CoinGecko feed used on the markets page.
   useEffect(() => {
-    try {
-      const cached = JSON.parse(localStorage.getItem(`bluechip_cmc_market_data_v2_${currency}`));
-      if (cached?.data?.length) {
-        const topSymbols = ['BTC', 'ETH', 'SOL', 'BNB', 'USDT', 'XRP', 'DOGE'];
-        const mapped = [];
-        topSymbols.forEach((sym) => {
-          const match = cached.data.find((c) => c.symbol.toUpperCase() === sym);
-          if (match) {
-            mapped.push({
-              id: match.id,
-              symbol: match.symbol.toUpperCase(),
-              name: match.name,
-              price: match.current_price,
-              change: match.price_change_percentage_24h_in_currency ?? match.price_change_percentage_24h ?? 0,
-              icon: match.image
-            });
+    const mapPreviewData = (data) => {
+      const topSymbols = ['BTC', 'ETH', 'SOL', 'BNB', 'USDT', 'XRP', 'DOGE'];
+      const mapped = [];
+
+      topSymbols.forEach((sym) => {
+        const match = data.find((c) => c.symbol.toUpperCase() === sym);
+        if (match) {
+          mapped.push({
+            id: match.id,
+            symbol: match.symbol.toUpperCase(),
+            name: match.name,
+            price: match.current_price,
+            change: match.price_change_percentage_24h_in_currency ?? match.price_change_percentage_24h ?? 0,
+            icon: match.image
+          });
+        }
+      });
+
+      return mapped;
+    };
+
+    const loadPreview = async () => {
+      const cacheKey = `bluechip_cmc_market_data_v2_${currency}`;
+
+      try {
+        const cached = JSON.parse(localStorage.getItem(cacheKey));
+        if (cached?.data?.length && Date.now() - (cached.timestamp || 0) < 3 * 60 * 1000) {
+          const mapped = mapPreviewData(cached.data);
+          if (mapped.length) {
+            setCoins(mapped);
+            return;
           }
-        });
-        if (mapped.length) setCoins(mapped);
+        }
+      } catch (e) {
+        // ignore cache parse errors and load live data instead
       }
-    } catch (e) {
-      // keep fallback
-    }
+
+      try {
+        const url = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=${currency}&order=market_cap_desc&per_page=100&page=1&sparkline=true&price_change_percentage=1h,24h,7d`;
+        const res = await fetch(url, { headers: { accept: 'application/json' } });
+
+        if (!res.ok) {
+          throw new Error(`CoinGecko HTTP ${res.status}`);
+        }
+
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > 0) {
+          const mapped = mapPreviewData(data);
+          if (mapped.length) {
+            setCoins(mapped);
+            localStorage.setItem(cacheKey, JSON.stringify({ data, timestamp: Date.now() }));
+          }
+        }
+      } catch (e) {
+        setCoins(PREVIEW_FALLBACK_COINS);
+      }
+    };
+
+    loadPreview();
   }, [currency]);
+
+  const liveBtcPrice = coins.find((coin) => coin.symbol === 'BTC')?.price ?? PREVIEW_FALLBACK_COINS.find((coin) => coin.symbol === 'BTC').price;
+  const liveUsdtPrice = coins.find((coin) => coin.symbol === 'USDT')?.price ?? PREVIEW_FALLBACK_COINS.find((coin) => coin.symbol === 'USDT').price;
 
   return (
     <div>

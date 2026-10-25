@@ -118,11 +118,14 @@ html[data-theme="dark"] #services .text-bluechip-600 {
   color: #e4edff !important;
 }
 
-/* ── Best Customer of the Week Banner ── */
+/* ── Community Testimonial Marquee Banner ── */
 .cw-banner{display:flex;align-items:center;gap:14px;background:linear-gradient(90deg,#0b1f50,#1a3a8c);color:#fff;padding:14px 24px;font-family:'DM Sans',sans-serif}
 .cw-star{font-size:28px;flex-shrink:0}
 .cw-title{font-weight:800;font-size:13px;letter-spacing:.05em;text-transform:uppercase;color:#93c5fd}
-.cw-quote{font-size:14px;color:#e0eaff;margin-top:2px}
+.cw-marquee{overflow:hidden;white-space:nowrap;position:relative}
+.cw-track{display:inline-flex;white-space:nowrap;align-items:center;gap:48px;will-change:transform;animation:cw-slide 28s linear infinite}
+.cw-quote{font-size:14px;color:#e0eaff;display:inline-flex;align-items:center;white-space:nowrap}
+@keyframes cw-slide{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
 /* ── Charts Section ── */
 .charts-section{background:#f7f9fd;border-top:1px solid #e2e8f0}
 html[data-theme="dark"] .charts-section{background:#0b1830;border-color:#1e3354}

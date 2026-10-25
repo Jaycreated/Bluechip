@@ -12,6 +12,13 @@ import './styles.css';
 
 const VALID_PAGES = ['home', 'markets', 'services', 'learn', 'community', 'about', 'contact'];
 
+const HEADER_TESTIMONIALS = [
+  '“Bluechip helped me start my crypto journey with confidence!” – Jane Johnson',
+  '“Fast settlement and honest rates for USDT. No delays or ghosting.” – Daniel A.',
+  '“The Learn lessons helped me avoid a fake Telegram investment group.” – Chidinma O.',
+  '“A real person answers the hotline and explains everything clearly.” – Maxwell T.',
+];
+
 function getInitialPage() {
   const hash = window.location.hash.replace(/^#\/?/, '').toLowerCase();
   if (VALID_PAGES.includes(hash)) return hash;
@@ -137,21 +144,27 @@ function App() {
         </div>
       </div>
 
-      {/* ── Best Customer of the Week Banner ── */}
-      <div className="cw-banner flex items-center justify-between px-4 py-2.5 bg-blue-900 text-white text-xs">
-        <div className="flex items-center gap-2 max-w-7xl mx-auto w-full">
-          <span className="cw-star text-base">⭐</span>
-          <div className="flex-1 flex flex-wrap items-center gap-x-2">
-            <span className="cw-title font-extrabold text-blue-200">Customer of the Week:</span>
-            <span className="cw-quote text-blue-50">
-              "Bluechip helped me start my crypto journey with confidence!" – <strong>Jane Johnson</strong>
-            </span>
+      {/* ── Community Testimonial Marquee Banner ── */}
+      <div className="cw-banner px-4 py-2.5 bg-blue-900 text-white text-xs overflow-hidden">
+        <div className="max-w-7xl mx-auto w-full flex items-center gap-3">
+          <span className="cw-star text-base shrink-0">⭐</span>
+
+          <div className="cw-marquee flex-1 min-w-0">
+            <div className="cw-track">
+              {[...HEADER_TESTIMONIALS, ...HEADER_TESTIMONIALS].map((quote, index) => (
+                <span key={`${quote}-${index}`} className="cw-quote inline-flex items-center text-blue-50">
+                  <span className="cw-title font-extrabold text-blue-200 mr-2">Community:</span>
+                  {quote}
+                </span>
+              ))}
+            </div>
           </div>
+
           <button
             onClick={() => navigate('community')}
             className="text-[11px] font-extrabold text-amber-300 hover:text-white transition shrink-0 cursor-pointer hidden sm:inline"
           >
-            Read Testimonial →
+            Read More →
           </button>
         </div>
       </div>
