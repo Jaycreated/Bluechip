@@ -111,6 +111,27 @@ export default function HomePage({ onNavigate, currency = 'usd' }) {
               Buy and sell crypto with speed and clarity, plus practical education to help you make better decisions.
             </p>
 
+            <div className="mt-8 rounded-2xl border border-white/15 bg-white/5 p-4 backdrop-blur-sm max-w-md">
+              <div className="flex items-center justify-between gap-3 mb-3">
+                <p className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-blue-200/80">Bluechip Trading Rate</p>
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/30 bg-emerald-500/10 px-2 py-1 text-[10px] font-bold text-emerald-300">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
+                  live
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="rounded-xl border border-white/10 bg-slate-950/20 px-3 py-2.5">
+                  <p className="text-[10px] uppercase tracking-[0.18em] text-blue-200/70">BTC</p>
+                  <p className="mt-1 text-lg font-extrabold text-white">₦1,353 / $</p>
+                </div>
+                <div className="rounded-xl border border-white/10 bg-slate-950/20 px-3 py-2.5">
+                  <p className="text-[10px] uppercase tracking-[0.18em] text-blue-200/70">USDT / USDC</p>
+                  <p className="mt-1 text-lg font-extrabold text-white">₦1,360 / $</p>
+                </div>
+              </div>
+            </div>
+
             <div className="mt-8 flex flex-col sm:flex-row gap-3">
               <button
                 onClick={() => onNavigate('services')}
@@ -145,6 +166,14 @@ export default function HomePage({ onNavigate, currency = 'usd' }) {
                   ● Active Now
                 </span>
               </div>
+
+              <a
+                href="mailto:support@thebluechipexchange.com"
+                className="group mb-5 inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-[11px] font-bold text-blue-100 hover:bg-white/10 transition"
+              >
+                <span className="text-blue-200">✉</span>
+                support@thebluechipexchange.com
+              </a>
 
               {/* Quick trade inquiry trigger */}
               <div className="space-y-3">
@@ -366,6 +395,14 @@ export default function HomePage({ onNavigate, currency = 'usd' }) {
                   Chat Hotline on WhatsApp ↗
                 </a>
               </div>
+
+              <a
+                href="mailto:support@thebluechipexchange.com"
+                className="mt-4 inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-[11px] font-bold text-bluechip-700 hover:bg-slate-50 transition"
+              >
+                <span className="text-base">✉</span>
+                support@thebluechipexchange.com
+              </a>
             </div>
 
             {/* Right: Supported Assets Pill Showcase */}

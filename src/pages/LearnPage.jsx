@@ -23,14 +23,14 @@ const LESSONS = [
     title: 'What is Bitcoin?',
     tag: 'Basics',
     color: 'bg-violet-100 text-violet-700',
-    summary: 'The first and best-known cryptocurrency.',
-    content: 'Bitcoin is a digital currency that can be transferred without a central bank. It runs on a public blockchain network, and its supply is limited by protocol rules. People use it for peer-to-peer transfers, value storage, and speculation, but it is volatile and should be understood before investing large amounts.',
+    summary: 'The first and most well-known cryptocurrency.',
+    content: 'Bitcoin is digital money that was created in 2009 by Satoshi Nakamoto. Unlike fiat currency, no government or bank controls it. People can send Bitcoin directly to one another, and every transaction is recorded on its blockchain. Bitcoin was created with a finite supply, and there will only ever be 21 million Bitcoin. Think of it like digital gold — it is limited, and many people hold it for the long term instead of spending it every day.',
     quiz: {
-      question: 'Is Bitcoin a traditional bank account or a blockchain-based asset?',
+      question: 'What is Bitcoin?',
       options: [
-        { text: 'A blockchain-based asset', correct: true },
-        { text: 'A government-issued savings account', correct: false },
-        { text: 'A guaranteed profit tool', correct: false }
+        { text: 'The first and most well-known cryptocurrency', correct: true },
+        { text: 'A bank-issued savings account', correct: false },
+        { text: 'A guaranteed way to earn daily profits', correct: false }
       ]
     }
   },
@@ -39,8 +39,8 @@ const LESSONS = [
     title: 'What are cryptocurrencies?',
     tag: 'Fundamentals',
     color: 'bg-emerald-100 text-emerald-700',
-    summary: 'Different coins, different use cases, different risks.',
-    content: 'Cryptocurrencies are digital assets that use cryptography and blockchain networks to move value or record ownership. Bitcoin, Ethereum, Solana, and USDT all serve different purposes. Some are payment networks, some are smart-contract platforms, and some are stable assets designed to track a fiat currency. Not all crypto is the same.',
+    summary: 'Digital money beyond Bitcoin, including altcoins and stablecoins.',
+    content: 'Cryptocurrencies are digital assets that use blockchain technology. Bitcoin was the first, but thousands of others now exist. • Bitcoin is the original and most valuable. • Altcoins are other cryptocurrencies built after Bitcoin, such as Ethereum and Solana. Some focus on speed, smart contracts, or specific uses. • Stablecoins are cryptocurrencies designed to stay at a steady value, usually pegged to the US dollar, such as USDT or USDC. People use them to avoid volatility when moving money, save digital dollars, and trade cryptocurrencies. To own a crypto asset, you usually have to buy it using a stablecoin or another cryptocurrency. Not all cryptocurrencies are the same. Some are useful, some are risky, and some exist mainly for speculation.',
     quiz: {
       question: 'Which statement is most accurate?',
       options: [
@@ -55,8 +55,8 @@ const LESSONS = [
     title: 'Wallets & Private Keys',
     tag: 'Security',
     color: 'bg-amber-100 text-amber-700',
-    summary: 'Your keys control your funds.',
-    content: 'A wallet stores the private keys that prove ownership of your crypto. Your seed phrase is the master key to your wallet. If someone gets your seed phrase, they can access your funds. Never share it, never type it into a website, and never trust anyone asking for it under the guise of support.',
+    summary: 'How you store and control your crypto.',
+    content: 'A crypto wallet is what you use to store, send, and receive cryptocurrency. There are two main types: • Hot wallets (connected to the internet) — convenient but less secure. • Cold wallets (offline) — also called hardware wallets or ledgers, and safer for larger amounts. Your private key, or seed phrase, is the most important thing. Whoever has it controls the crypto. Never share it with anyone, and never store it only on your phone or computer. If you lose your private key and have no backup, your crypto is gone forever.',
     quiz: {
       question: 'What should you never do with your seed phrase?',
       options: [
@@ -72,7 +72,7 @@ const LESSONS = [
     tag: 'Transfers',
     color: 'bg-rose-100 text-rose-700',
     summary: 'Always check the network before sending funds.',
-    content: 'Different tokens exist on different networks. USDT may live on TRC20, ERC20, or BEP20, and sending it on the wrong network can lead to permanent loss. Always confirm the wallet address and the network before moving funds, and avoid rushing when sending large amounts.',
+    content: 'When you send crypto, you have to choose the right network. For example, USDT can travel on different networks such as TRC20, ERC20, or BEP20. Think of it like sending a package: if you choose the wrong delivery company, the package may not arrive. Sending crypto on the wrong network can mean the money is lost. Fees also change depending on the network. Some networks are cheaper and faster, while others cost more. Always check the network and the fee before you send.',
     quiz: {
       question: 'What should you confirm before sending crypto?',
       options: [
@@ -87,8 +87,8 @@ const LESSONS = [
     title: 'Scams, Safety & Smart Habits',
     tag: 'Protection',
     color: 'bg-sky-100 text-sky-700',
-    summary: 'The best defense is education and caution.',
-    content: 'Crypto scams often use urgency, guaranteed returns, fake support agents, or strange WhatsApp and Telegram account names. Real support channels are verified, and no trusted platform will promise guaranteed profits. If a deal feels rushed or too good to be true, pause, verify, and ask questions before moving money.',
+    summary: 'How to protect yourself in crypto.',
+    content: 'In crypto, there is usually no bank that can reverse a payment or recover your money. This is why you have to be careful. Watch out for these red flags: • Anyone promising you high returns every day • People asking for your private key or seed phrase • Random investment groups on Telegram or WhatsApp • Pressure to send money quickly. Good habits: • Never share your private key • Double-check the address and network before sending • Start with small amounts while you are learning • Take your time and verify information yourself. If something feels too good to be true or too rushed, it is safer to walk away.',
     quiz: {
       question: 'What is the safest reaction to a message promising guaranteed crypto profits?',
       options: [
@@ -278,33 +278,33 @@ export default function LearnPage() {
                 {/* Accordion Header */}
                 <button
                   onClick={() => toggleLesson(lesson.id)}
-                  className="w-full text-left p-5 flex items-center justify-between gap-4 cursor-pointer hover:bg-slate-50/60 transition"
+                  className="w-full text-left p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 cursor-pointer hover:bg-slate-50/60 transition"
                 >
-                  <div className="flex items-center gap-4">
-                    <span className={`w-10 h-10 rounded-xl grid place-items-center font-extrabold text-sm shrink-0 ${lesson.color}`}>
+                  <div className="flex items-start gap-3 sm:gap-4 min-w-0">
+                    <span className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl grid place-items-center font-extrabold text-xs sm:text-sm shrink-0 ${lesson.color}`}>
                       0{lesson.id + 1}
                     </span>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-extrabold text-base text-bluechip-950">{lesson.title}</h3>
-                        <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-100 text-slate-500">
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h3 className="font-extrabold text-sm sm:text-base text-bluechip-950 leading-snug">{lesson.title}</h3>
+                        <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-100 text-slate-500">
                           {lesson.tag}
                         </span>
                       </div>
-                      <p className="text-xs text-slate-400 mt-0.5">{lesson.summary}</p>
+                      <p className="text-[11px] sm:text-xs text-slate-400 mt-0.5">{lesson.summary}</p>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-3 shrink-0">
+                  <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-3 shrink-0 w-full sm:w-auto">
                     {isDone ? (
-                      <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full">
-                        <CheckCircle size={14} /> Completed
+                      <span className="inline-flex items-center gap-1 text-[10px] sm:text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full">
+                        <CheckCircle size={12} className="sm:w-[14px] sm:h-[14px]" /> Completed
                       </span>
                     ) : (
-                      <span className="text-xs text-slate-400 font-medium hidden sm:inline">Pending</span>
+                      <span className="text-[10px] sm:text-xs text-slate-400 font-medium hidden sm:inline">Pending</span>
                     )}
                     <ChevronDown
-                      size={20}
+                      size={18}
                       className={`text-slate-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
                     />
                   </div>
@@ -312,22 +312,22 @@ export default function LearnPage() {
 
                 {/* Expanded Lesson Content */}
                 {isOpen && (
-                  <div className="px-5 pb-6 pt-2 border-t border-slate-100 text-sm text-slate-600 leading-relaxed">
-                    <p className="text-slate-700 font-normal leading-7 mb-5">{lesson.content}</p>
+                  <div className="px-4 sm:px-5 pb-5 sm:pb-6 pt-2 border-t border-slate-100 text-sm text-slate-600 leading-relaxed">
+                    <p className="text-slate-700 font-normal leading-6 sm:leading-7 mb-4 sm:mb-5">{lesson.content}</p>
 
                     {/* Interactive Quiz */}
-                    <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 mb-5">
-                      <p className="font-extrabold text-xs text-bluechip-950 uppercase tracking-wider mb-2">
+                    <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 sm:p-5 mb-4 sm:mb-5">
+                      <p className="font-extrabold text-[10px] sm:text-xs text-bluechip-950 uppercase tracking-wider mb-2">
                         Quick Knowledge Check:
                       </p>
-                      <p className="font-bold text-sm text-bluechip-900 mb-3">{lesson.quiz.question}</p>
+                      <p className="font-bold text-xs sm:text-sm text-bluechip-900 mb-3">{lesson.quiz.question}</p>
 
                       <div className="space-y-2">
                         {lesson.quiz.options.map((opt, oIdx) => (
                           <button
                             key={oIdx}
                             onClick={() => handleQuizAnswer(lesson.id, opt.correct)}
-                            className="w-full text-left px-4 py-2.5 rounded-xl border border-slate-200 bg-white hover:border-bluechip-600 hover:bg-blue-50/50 text-xs font-semibold text-slate-700 transition cursor-pointer"
+                            className="w-full text-left px-3 sm:px-4 py-2.5 rounded-xl border border-slate-200 bg-white hover:border-bluechip-600 hover:bg-blue-50/50 text-[11px] sm:text-xs font-semibold text-slate-700 transition cursor-pointer"
                           >
                             {opt.text}
                           </button>
@@ -335,7 +335,7 @@ export default function LearnPage() {
                       </div>
 
                       {userQuiz !== undefined && (
-                        <div className={`mt-3 text-xs font-extrabold flex items-center gap-1.5 ${userQuiz ? 'text-emerald-600' : 'text-rose-600'}`}>
+                        <div className={`mt-3 text-[11px] sm:text-xs font-extrabold flex items-center gap-1.5 ${userQuiz ? 'text-emerald-600' : 'text-rose-600'}`}>
                           {userQuiz ? (
                             <>
                               <CheckCircle size={15} /> Correct! Knowledge is your best protection.
@@ -351,7 +351,7 @@ export default function LearnPage() {
 
                     <button
                       onClick={() => markComplete(lesson.id)}
-                      className={`px-5 py-2.5 rounded-xl text-xs font-extrabold transition cursor-pointer ${
+                      className={`w-full sm:w-auto px-4 sm:px-5 py-2.5 rounded-xl text-[11px] sm:text-xs font-extrabold transition cursor-pointer ${
                         isDone
                           ? 'bg-emerald-100 text-emerald-800'
                           : 'bg-bluechip-600 hover:bg-bluechip-700 text-white shadow-xs'
@@ -389,6 +389,28 @@ export default function LearnPage() {
           >
             Email: support@thebluechipexchange.com
           </a>
+        </div>
+
+        <div className="mt-5 pt-5 border-t border-slate-200">
+          <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">Latest threads</p>
+          <div className="mt-3 flex flex-col sm:flex-row gap-3">
+            <a
+              href="https://x.com/babyflaako/status/2058516307188810176"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center rounded-xl border border-sky-200 bg-sky-50 px-4 py-2.5 text-xs font-extrabold text-sky-700 hover:bg-sky-100 transition"
+            >
+              Read thread 1 ↗
+            </a>
+            <a
+              href="https://x.com/babyflaako/status/2099323261125275962?s=12"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center rounded-xl border border-sky-200 bg-sky-50 px-4 py-2.5 text-xs font-extrabold text-sky-700 hover:bg-sky-100 transition"
+            >
+              Read thread 2 ↗
+            </a>
+          </div>
         </div>
       </div>
     </div>
