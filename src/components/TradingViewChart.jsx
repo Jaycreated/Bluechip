@@ -156,8 +156,7 @@ function TradingViewChart({ theme = 'dark', initialSymbol = 'BINANCE:BTCUSDT' })
           minHeight: '320px',
           width: '100%',
           maxWidth: '100%',
-          overflowX: 'auto',
-          overflowY: 'hidden',
+          overflow: 'hidden',
           WebkitOverflowScrolling: 'touch',
           scrollbarWidth: 'none',
         }}
@@ -166,8 +165,8 @@ function TradingViewChart({ theme = 'dark', initialSymbol = 'BINANCE:BTCUSDT' })
           ref={containerRef}
           className="w-full h-full"
           style={{
-            width: isFullscreen ? '100%' : '860px',
-            minWidth: isFullscreen ? '100%' : '860px',
+            width: '100%',
+            minWidth: '100%',
             height: '100%',
             maxWidth: 'none',
             overflow: 'hidden',
