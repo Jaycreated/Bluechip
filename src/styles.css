@@ -104,6 +104,11 @@ html[data-theme="dark"] #gainers .border-slate-100,
 html[data-theme="dark"] #losers .border-slate-100 {
   border-color: #263956 !important;
 }
+html[data-theme="dark"] .text-slate-400,
+html[data-theme="dark"] .text-slate-500,
+html[data-theme="dark"] .text-slate-600,
+html[data-theme="dark"] .text-slate-700,
+html[data-theme="dark"] .text-slate-800,
 html[data-theme="dark"] header .text-slate-500,
 html[data-theme="dark"] header .text-slate-600,
 html[data-theme="dark"] #learn .text-bluechip-600,

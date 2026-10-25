@@ -100,11 +100,15 @@ export default function HomePage({ onNavigate, currency = 'usd' }) {
             </div>
 
             <h1 className="mt-6 text-4xl sm:text-5xl lg:text-[60px] leading-[1.08] font-extrabold tracking-tight">
-              Your trusted crypto <span className="text-blue-300">hotline</span> in Nigeria.
+              Premium OTC Crypto for Nigerians.
             </h1>
 
+            <p className="mt-3 text-lg sm:text-2xl font-bold text-blue-200 tracking-tight">
+              Fast. Clear. Educational.
+            </p>
+
             <p className="mt-6 max-w-xl text-blue-100/85 text-base sm:text-lg leading-8 font-medium">
-              Buy, sell and understand crypto with more clarity. Straightforward support for your next move, plus practical education to help you make informed decisions.
+              Buy and sell crypto with speed and clarity, plus practical education to help you make better decisions.
             </p>
 
             <div className="mt-8 flex flex-col sm:flex-row gap-3">
@@ -165,7 +169,7 @@ export default function HomePage({ onNavigate, currency = 'usd' }) {
                   href={`https://wa.me/2347037629149?text=${encodeURIComponent(`Hello Bluechip Hotline (+234 703 762 9149), I want to trade ${selectedTradeAsset}. Please confirm today's exchange rate.`)}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full py-3.5 bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-xs rounded-xl flex items-center justify-center gap-2 transition shadow-lg shadow-emerald-500/20 mt-2"
+                  className="w-full p-3.5 bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-xs rounded-xl flex items-center justify-center gap-2 transition shadow-lg shadow-emerald-500/20 mt-2"
                 >
                   Ask Today's {selectedTradeAsset} Rate on WhatsApp (+234 703 762 9149) ↗
                 </a>
@@ -421,6 +425,27 @@ export default function HomePage({ onNavigate, currency = 'usd' }) {
             >
               Open Academy &amp; Watch Videos →
             </button>
+
+            <div className="mt-8 rounded-3xl border border-slate-200 bg-gradient-to-r from-slate-50 to-bluechip-50 p-5">
+              <p className="text-[11px] font-black uppercase tracking-[0.18em] text-bluechip-600">Keep learning</p>
+              <p className="mt-2 text-sm font-bold text-bluechip-950">Speak with the Bluechip team to get more exclusive lessons.</p>
+              <div className="mt-4 flex flex-col sm:flex-row gap-3">
+                <a
+                  href="https://wa.me/2347037629149?text=Hello%20Bluechip,%20I%20want%20to%20keep%20learning%20about%20crypto."
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center rounded-xl bg-bluechip-900 px-4 py-2.5 text-[11px] font-extrabold text-white hover:bg-bluechip-800 transition"
+                >
+                  WhatsApp: +234 703 762 9149
+                </a>
+                <a
+                  href="mailto:support@thebluechipexchange.com"
+                  className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-[11px] font-extrabold text-bluechip-700 hover:bg-slate-50 transition"
+                >
+                  Email: support@thebluechipexchange.com
+                </a>
+              </div>
+            </div>
           </div>
 
           {/* Right Video Teaser Card */}
@@ -428,21 +453,47 @@ export default function HomePage({ onNavigate, currency = 'usd' }) {
             onClick={() => onNavigate('learn')}
             className="bg-bluechip-950 text-white rounded-3xl p-6 sm:p-8 shadow-xl border border-white/10 cursor-pointer group"
           >
-            <div className="relative aspect-video rounded-2xl bg-black/60 border border-white/10 flex items-center justify-center p-4 text-center group-hover:border-blue-400/40 transition">
-              <div className="w-14 h-14 rounded-full bg-bluechip-600 text-white grid place-items-center shadow-lg group-hover:scale-110 transition">
-                <Play size={24} className="translate-x-0.5" />
+            <div className="relative aspect-video rounded-2xl bg-black/60 border border-white/10 overflow-hidden flex flex-col justify-center items-center p-6 text-center group-hover:border-blue-400/40 transition">
+              <div className="w-16 h-16 rounded-full bg-slate-200/10 border border-white/15 text-white grid place-items-center shadow-xl group-hover:scale-105 transition">
+                <Play size={28} className="text-blue-200 opacity-60 translate-x-0.5" />
               </div>
-              <span className="absolute bottom-3 left-3 text-[10px] bg-black/70 px-2.5 py-1 rounded text-white font-bold">
-                Episode 1 Preview
+              <p className="font-extrabold text-base text-white mt-5">Coming Soon</p>
+              <span className="text-xs text-blue-200/70 mt-1">Short crypto education videos are being prepared for launch.</span>
+              <span className="absolute bottom-3 right-3 text-[10px] bg-white/10 px-2.5 py-1 rounded-md text-white/80 font-bold border border-white/10">
+                COMING SOON
               </span>
             </div>
             <h3 className="font-extrabold text-lg mt-4 text-white group-hover:text-blue-300 transition">
-              Crypto for Complete Beginners in Nigeria
+              Crypto education videos are on the way
             </h3>
             <p className="text-xs text-blue-200/70 mt-1">
-              Watch Vicky and the team explain wallets, seed phrases, and network fees step by step.
+              Learn wallets, scam prevention, stablecoins, and safer crypto habits with bite-sized lessons for beginners in Nigeria.
             </p>
           </div>
+        </div>
+      </section>
+
+      {/* ── Roadmap ── */}
+      <section className="max-w-7xl mx-auto px-4 py-16">
+        <div className="mb-8">
+          <p className="text-bluechip-600 uppercase tracking-[.18em] text-xs font-extrabold">Roadmap</p>
+          <h2 className="text-3xl font-extrabold text-bluechip-950 mt-2">Where Bluechip is going next</h2>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-6">
+          {[
+            { label: 'Current', title: 'Premium OTC with education', text: 'Fast, direct crypto buying and selling support. Clear guidance and safe decision-making first.' },
+            { label: 'Next', title: 'Secure storage product (ledger)', text: 'A safer custody option built for users who want more control over their assets and recovery process.' },
+            { label: 'Later', title: 'Full exchange platform', text: 'A wider trading experience built on trust, liquidity, and strong user education.' },
+          ].map((step) => (
+            <div key={step.label} className="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-soft">
+              <span className="inline-flex items-center rounded-full bg-bluechip-100 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-bluechip-700">
+                {step.label}
+              </span>
+              <h3 className="mt-4 text-xl font-extrabold text-bluechip-950">{step.title}</h3>
+              <p className="mt-3 text-sm text-slate-500 leading-relaxed">{step.text}</p>
+            </div>
+          ))}
         </div>
       </section>
 
@@ -551,13 +602,12 @@ export default function HomePage({ onNavigate, currency = 'usd' }) {
           </button>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3.5 mb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5 mb-8">
           {[
-            { name: 'Ridwan Yusuf', role: 'Founder', initial: 'R', color: 'bg-blue-600' },
-            { name: 'Johnson John', role: 'Dev', initial: 'J', color: 'bg-indigo-600' },
-            { name: 'Victoria Shima', role: 'Community', initial: 'V', color: 'bg-emerald-600' },
-            { name: 'Victoria Shima', role: 'Social Media', initial: 'V', color: 'bg-amber-600' },
-            { name: 'Ridwan Yusuf', role: 'CFO', initial: 'R', color: 'bg-rose-600' },
+            { name: 'Ridwan Yusuf', role: 'Former Founder + CFO', initial: 'R', color: 'bg-blue-600' },
+            { name: 'Johnson John', role: 'Lead Developer', initial: 'J', color: 'bg-indigo-600' },
+            { name: 'Victoria Shima', role: 'Community + Social Media', initial: 'V', color: 'bg-emerald-600' },
+            { name: 'Bluechip Team', role: 'Human Support', initial: 'B', color: 'bg-rose-600' },
           ].map((m) => (
             <div
               key={m.name}
