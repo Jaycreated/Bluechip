@@ -64,14 +64,12 @@ function App() {
         .from('reviews')
         .select('*')
         .eq('approved', true)
-        .order('created_at', { ascending: false })
-        .limit(8);
+        .order('created_at', { ascending: false });
 
       if (!error && data && data.length) {
         const latest = data
           .filter((item) => item.quote && item.name)
-          .map((item) => formatReviewQuote({ name: item.name, quote: item.quote }))
-          .slice(0, 8);
+          .map((item) => formatReviewQuote({ name: item.name, quote: item.quote }));
 
         if (latest.length) {
           setHeaderTestimonials(latest);

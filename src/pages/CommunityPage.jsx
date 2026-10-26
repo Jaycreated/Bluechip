@@ -35,6 +35,8 @@ const fallbackTestimonials = [
   }
 ];
 
+const COMMUNITY_REVIEWS_PER_PAGE = 6;
+
 const emptyForm = {
   name: '',
   location: '',
@@ -43,7 +45,8 @@ const emptyForm = {
 };
 
 export default function CommunityPage() {
-  const [testimonials, setTestimonials] = useState(fallbackTestimonials);
+  const [allTestimonials, setAllTestimonials] = useState(fallbackTestimonials);
+  const [page, setPage] = useState(1);
   const [form, setForm] = useState(emptyForm);
   const [status, setStatus] = useState({ type: 'idle', message: '' });
   const [submitting, setSubmitting] = useState(false);
@@ -55,8 +58,7 @@ export default function CommunityPage() {
       const { data, error } = await supabase
         .from('reviews')
         .select('*')
-        .order('created_at', { ascending: false })
-        .limit(12);
+        .order('created_at', { ascending: false });
 
       if (!error && data && data.length) {
         const mapped = data.map((row) => ({
@@ -69,12 +71,16 @@ export default function CommunityPage() {
           date: row.created_at ? new Date(row.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Recent review',
         }));
 
-        setTestimonials(mapped);
+        setAllTestimonials(mapped);
+        setPage(1);
       }
     };
 
     loadReviews();
   }, []);
+
+  const totalPages = Math.max(1, Math.ceil(allTestimonials.length / COMMUNITY_REVIEWS_PER_PAGE));
+  const visibleTestimonials = allTestimonials.slice((page - 1) * COMMUNITY_REVIEWS_PER_PAGE, page * COMMUNITY_REVIEWS_PER_PAGE);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -125,7 +131,8 @@ export default function CommunityPage() {
       date: 'Just now',
     };
 
-    setTestimonials((current) => [freshReview, ...current]);
+    setAllTestimonials((current) => [freshReview, ...current]);
+    setPage(1);
   };
 
   return (
@@ -311,11 +318,17 @@ export default function CommunityPage() {
       </div>
 
       <div>
-        <h2 className="text-2xl font-extrabold text-bluechip-950 tracking-tight mb-6">
-          What Traders Say About Our Hotline
-        </h2>
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
+          <h2 className="text-2xl font-extrabold text-bluechip-950 tracking-tight">
+            What Traders Say About Our Hotline
+          </h2>
+          <p className="text-sm text-slate-500 font-medium">
+            Showing {visibleTestimonials.length} of {allTestimonials.length} reviews
+          </p>
+        </div>
+
         <div className="grid md:grid-cols-3 gap-6">
-          {testimonials.map((t, idx) => (
+          {visibleTestimonials.map((t, idx) => (
             <div
               key={t.id || idx}
               className="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-xs flex flex-col justify-between"
@@ -340,6 +353,30 @@ export default function CommunityPage() {
               </div>
             </div>
           ))}
+        </div>
+
+        <div className="mt-8 flex items-center justify-between gap-3 p-2 border-t border-slate-200 rounded-xl">
+          <button
+            type="button"
+            onClick={() => setPage((current) => Math.max(1, current - 1))}
+            disabled={page === 1}
+            className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-bold text-slate-700 disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            Previous
+          </button>
+
+          <p className="text-sm font-semibold text-slate-600">
+            Page {page} of {totalPages}
+          </p>
+
+          <button
+            type="button"
+            onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
+            disabled={page === totalPages}
+            className="rounded-xl bg-bluechip-600 px-4 py-2 text-sm font-bold text-white disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            Next
+          </button>
         </div>
       </div>
     </div>

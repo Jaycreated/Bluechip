@@ -65,6 +65,8 @@ const PREVIEW_LOSERS = [
   { symbol: 'SEI', name: 'Sei', change: -11.90, price: 0.46, icon: 'https://assets.coingecko.com/coins/images/28205/large/Sei_Logo_-_Transparent.png' },
 ];
 
+const MAX_HOME_REVIEWS = 3;
+
 const FALLBACK_REVIEWS = [
   { id: 'fallback-home-1', name: 'Jane Johnson', location: 'Lagos, Nigeria', quote: 'Bluechip helped me start my crypto journey with confidence!', rating: 5 },
   { id: 'fallback-home-2', name: 'Daniel A.', location: 'Abuja, Nigeria', quote: 'Fast settlement and honest rates for USDT. No delays or ghosting.', rating: 5 },
@@ -102,7 +104,7 @@ export default function HomePage({ onNavigate, currency = 'usd' }) {
         .select('*')
         .eq('approved', true)
         .order('created_at', { ascending: false })
-        .limit(6);
+        .limit(MAX_HOME_REVIEWS + 3);
 
       if (!error && data && data.length) {
         const mapped = data
@@ -114,7 +116,7 @@ export default function HomePage({ onNavigate, currency = 'usd' }) {
             quote: item.quote,
             rating: Number(item.rating) || 5,
           }))
-          .slice(0, 3);
+          .slice(0, MAX_HOME_REVIEWS);
 
         if (mapped.length) {
           setReviews(mapped);
