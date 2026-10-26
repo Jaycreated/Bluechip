@@ -16,6 +16,7 @@ import {
   ArrowDownRight, 
   Send 
 } from 'lucide-react';
+import { supabase } from '../lib/supabase.js';
 
 const makeFallbackToken = (symbol = 'CRYPTO') => {
   const text = String(symbol).toUpperCase().slice(0, 2) || 'CR';
@@ -64,6 +65,12 @@ const PREVIEW_LOSERS = [
   { symbol: 'SEI', name: 'Sei', change: -11.90, price: 0.46, icon: 'https://assets.coingecko.com/coins/images/28205/large/Sei_Logo_-_Transparent.png' },
 ];
 
+const FALLBACK_REVIEWS = [
+  { id: 'fallback-home-1', name: 'Jane Johnson', location: 'Lagos, Nigeria', quote: 'Bluechip helped me start my crypto journey with confidence!', rating: 5 },
+  { id: 'fallback-home-2', name: 'Daniel A.', location: 'Abuja, Nigeria', quote: 'Fast settlement and honest rates for USDT. No delays or ghosting.', rating: 5 },
+  { id: 'fallback-home-3', name: 'Chidinma O.', location: 'Port Harcourt', quote: 'The Learn lessons helped me avoid a fake Telegram investment group.', rating: 5 },
+];
+
 function formatPrice(val, currency = 'usd') {
   if (!val) return '-';
   const prefix = currency === 'ngn' ? '₦' : '$';
@@ -81,6 +88,42 @@ function formatPrice(val, currency = 'usd') {
 export default function HomePage({ onNavigate, currency = 'usd' }) {
   const [coins, setCoins] = useState(PREVIEW_FALLBACK_COINS);
   const [selectedTradeAsset, setSelectedTradeAsset] = useState('USDT');
+  const [reviews, setReviews] = useState(FALLBACK_REVIEWS);
+
+  useEffect(() => {
+    const loadReviews = async () => {
+      if (!supabase) {
+        setReviews(FALLBACK_REVIEWS);
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from('reviews')
+        .select('*')
+        .eq('approved', true)
+        .order('created_at', { ascending: false })
+        .limit(6);
+
+      if (!error && data && data.length) {
+        const mapped = data
+          .filter((item) => item.quote && item.name)
+          .map((item) => ({
+            id: item.id,
+            name: item.name,
+            location: item.location || 'Nigeria',
+            quote: item.quote,
+            rating: Number(item.rating) || 5,
+          }))
+          .slice(0, 3);
+
+        if (mapped.length) {
+          setReviews(mapped);
+        }
+      }
+    };
+
+    loadReviews();
+  }, []);
 
   // Keep the homepage preview in sync with the same live CoinGecko feed used on the markets page.
   useEffect(() => {
@@ -633,68 +676,56 @@ export default function HomePage({ onNavigate, currency = 'usd' }) {
           </div>
 
           <div className="grid md:grid-cols-3 gap-6">
-            {/* Jane Doe Spotlight */}
-            <div className="bg-gradient-to-br from-bluechip-950 to-bluechip-900 text-white rounded-3xl p-6 shadow-md flex flex-col justify-between">
-              <div>
-                <span className="text-[10px] font-black uppercase tracking-wider text-amber-300 bg-amber-400/20 px-2 py-0.5 rounded">
-                  ⭐ Customer of the Week
-                </span>
-                <p className="mt-4 text-sm font-bold text-blue-50 leading-relaxed italic">
-                  "Bluechip helped me start my crypto journey with confidence! The hotline explained TRC20 fees clearly before I transferred a single Naira."
-                </p>
-              </div>
-              <div className="mt-6 pt-4 border-t border-white/10 flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-amber-400 text-bluechip-950 font-black text-sm grid place-items-center">
-                  J
-                </div>
-                <div>
-                  <p className="font-extrabold text-xs text-white">John Johnson</p>
-                  <p className="text-[10px] text-blue-200/70">Verified Customer · Lagos</p>
-                </div>
-              </div>
-            </div>
+            {reviews.map((review, index) => {
+              const avatar = (review.name || 'A').charAt(0).toUpperCase();
+              const isFeatured = index === 0;
 
-            {/* Testimonial 2 */}
-            <div className="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-xs flex flex-col justify-between">
-              <div>
-                <div className="flex items-center gap-1 text-amber-400 mb-2">
-                  {[...Array(5)].map((_, i) => <Star key={i} size={14} className="fill-amber-400" />)}
-                </div>
-                <p className="text-xs text-slate-600 leading-relaxed italic font-medium">
-                  "Fast settlement and honest rates for USDT. No delays or ghosting like on peer-to-peer apps. When you call the hotline, a real person answers."
-                </p>
-              </div>
-              <div className="mt-6 pt-4 border-t border-slate-100 flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-bluechip-100 text-bluechip-800 font-extrabold text-sm grid place-items-center">
-                  I
-                </div>
-                <div>
-                  <p className="font-extrabold text-xs text-bluechip-950">Ibrahim Bello</p>
-                  <p className="text-[10px] text-slate-400">Abuja, Nigeria</p>
-                </div>
-              </div>
-            </div>
+              if (isFeatured) {
+                return (
+                  <div key={review.id || review.name} className="bg-gradient-to-br from-bluechip-950 to-bluechip-900 text-white rounded-3xl p-6 shadow-md flex flex-col justify-between">
+                    <div>
+                      <span className="text-[10px] font-black uppercase tracking-wider text-amber-300 bg-amber-400/20 px-2 py-0.5 rounded">
+                        ⭐ Customer of the Week
+                      </span>
+                      <p className="mt-4 text-sm font-bold text-blue-50 leading-relaxed italic">
+                        "{review.quote}"
+                      </p>
+                    </div>
+                    <div className="mt-6 pt-4 border-t border-white/10 flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-xl bg-amber-400 text-bluechip-950 font-black text-sm grid place-items-center">
+                        {avatar}
+                      </div>
+                      <div>
+                        <p className="font-extrabold text-xs text-white">{review.name}</p>
+                        <p className="text-[10px] text-blue-200/70">Verified Customer · {review.location}</p>
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
 
-            {/* Testimonial 3 */}
-            <div className="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-xs flex flex-col justify-between">
-              <div>
-                <div className="flex items-center gap-1 text-amber-400 mb-2">
-                  {[...Array(5)].map((_, i) => <Star key={i} size={14} className="fill-amber-400" />)}
+              return (
+                <div key={review.id || review.name} className="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-xs flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center gap-1 text-amber-400 mb-2">
+                      {[...Array(review.rating || 5)].map((_, starIndex) => <Star key={`${review.id || review.name}-${starIndex}`} size={14} className="fill-amber-400" />)}
+                    </div>
+                    <p className="text-xs text-slate-600 leading-relaxed italic font-medium">
+                      "{review.quote}"
+                    </p>
+                  </div>
+                  <div className="mt-6 pt-4 border-t border-slate-100 flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-bluechip-100 text-bluechip-800 font-extrabold text-sm grid place-items-center">
+                      {avatar}
+                    </div>
+                    <div>
+                      <p className="font-extrabold text-xs text-bluechip-950">{review.name}</p>
+                      <p className="text-[10px] text-slate-400">{review.location}</p>
+                    </div>
+                  </div>
                 </div>
-                <p className="text-xs text-slate-600 leading-relaxed italic font-medium">
-                  "The Bluechip Learn lessons helped me avoid a fake Telegram investment group that almost drained my wallet. Thank you team!"
-                </p>
-              </div>
-              <div className="mt-6 pt-4 border-t border-slate-100 flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-bluechip-100 text-bluechip-800 font-extrabold text-sm grid place-items-center">
-                  N
-                </div>
-                <div>
-                  <p className="font-extrabold text-xs text-bluechip-950">Ngozi Eze</p>
-                  <p className="text-[10px] text-slate-400">Port Harcourt</p>
-                </div>
-              </div>
-            </div>
+              );
+            })}
           </div>
         </div>
       </section>

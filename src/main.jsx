@@ -8,6 +8,7 @@ import LearnPage from './pages/LearnPage.jsx';
 import CommunityPage from './pages/CommunityPage.jsx';
 import AboutPage from './pages/AboutPage.jsx';
 import ContactPage from './pages/ContactPage.jsx';
+import { supabase } from './lib/supabase.js';
 import './styles.css';
 
 const VALID_PAGES = ['home', 'markets', 'services', 'learn', 'community', 'about', 'contact'];
@@ -18,6 +19,8 @@ const HEADER_TESTIMONIALS = [
   '“The Learn lessons helped me avoid a fake Telegram investment group.” – Chidinma O.',
   '“A real person answers the hotline and explains everything clearly.” – Maxwell T.',
 ];
+
+const formatReviewQuote = (review) => `“${review.quote}” – ${review.name}`;
 
 function getInitialPage() {
   const hash = window.location.hash.replace(/^#\/?/, '').toLowerCase();
@@ -35,6 +38,7 @@ function App() {
   const [currency, setCurrency] = useState(() => localStorage.getItem('bluechip-currency') || 'usd');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [sparklines, setSparklines] = useState({});
+  const [headerTestimonials, setHeaderTestimonials] = useState(HEADER_TESTIMONIALS);
   const [isAnimating, setIsAnimating] = useState(false);
 
   // Sync theme
@@ -48,6 +52,35 @@ function App() {
     document.documentElement.dataset.currency = currency;
     localStorage.setItem('bluechip-currency', currency);
   }, [currency]);
+
+  useEffect(() => {
+    const loadReviews = async () => {
+      if (!supabase) {
+        setHeaderTestimonials(HEADER_TESTIMONIALS);
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from('reviews')
+        .select('*')
+        .eq('approved', true)
+        .order('created_at', { ascending: false })
+        .limit(8);
+
+      if (!error && data && data.length) {
+        const latest = data
+          .filter((item) => item.quote && item.name)
+          .map((item) => formatReviewQuote({ name: item.name, quote: item.quote }))
+          .slice(0, 8);
+
+        if (latest.length) {
+          setHeaderTestimonials(latest);
+        }
+      }
+    };
+
+    loadReviews();
+  }, []);
 
   // Browser history sync (back/forward buttons)
   useEffect(() => {
@@ -151,7 +184,7 @@ function App() {
 
           <div className="cw-marquee flex-1 min-w-0">
             <div className="cw-track">
-              {[...HEADER_TESTIMONIALS, ...HEADER_TESTIMONIALS].map((quote, index) => (
+              {[...headerTestimonials, ...headerTestimonials].map((quote, index) => (
                 <span key={`${quote}-${index}`} className="cw-quote inline-flex items-center text-blue-50">
                   <span className="cw-title font-extrabold text-blue-200 mr-2">Community:</span>
                   {quote}
