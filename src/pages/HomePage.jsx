@@ -232,11 +232,11 @@ export default function HomePage({ onNavigate, currency = 'usd' }) {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="rounded-xl border border-white/10 bg-slate-950/20 px-3 py-2.5">
                   <p className="text-[10px] uppercase tracking-[0.18em] text-blue-200/70">BTC</p>
-                  <p className="mt-1 text-lg font-extrabold text-white">₦1,353 / $</p>
+                  <p className="mt-1 text-lg font-extrabold text-white">1,353 / $</p>
                 </div>
                 <div className="rounded-xl border border-white/10 bg-slate-950/20 px-3 py-2.5">
                   <p className="text-[10px] uppercase tracking-[0.18em] text-blue-200/70">USDT / USDC</p>
-                  <p className="mt-1 text-lg font-extrabold text-white">₦1,360 / $</p>
+                  <p className="mt-1 text-lg font-extrabold text-white">1,360 / $</p>
                 </div>
               </div>
             </div>

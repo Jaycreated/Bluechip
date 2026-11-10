@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Sun, Moon, Menu, X, ArrowUpRight, Star } from 'lucide-react';
 import HomePage from './pages/HomePage.jsx';
@@ -40,6 +40,7 @@ function App() {
   const [sparklines, setSparklines] = useState({});
   const [headerTestimonials, setHeaderTestimonials] = useState(HEADER_TESTIMONIALS);
   const [isAnimating, setIsAnimating] = useState(false);
+  const navTimeoutRef = useRef(null);
 
   // Sync theme
   useEffect(() => {
@@ -85,6 +86,7 @@ function App() {
     const handlePopState = () => {
       const page = getInitialPage();
       setCurrentPage(page);
+      setIsAnimating(false);
     };
 
     window.addEventListener('popstate', handlePopState);
@@ -94,6 +96,10 @@ function App() {
       window.removeEventListener('hashchange', handlePopState);
     };
   }, []);
+
+  useEffect(() => {
+    setIsAnimating(false);
+  }, [currentPage]);
 
   // Scroll reveal animation for sections and cards
   useEffect(() => {
@@ -129,17 +135,39 @@ function App() {
   }, [currentPage, theme, currency]);
 
   const navigate = (page) => {
-    // Start fade-out animation
-    setIsAnimating(true);
-    setTimeout(() => {
-      setCurrentPage(page);
+    if (navTimeoutRef.current) {
+      clearTimeout(navTimeoutRef.current);
+    }
+
+    if (page === 'markets') {
+      setIsAnimating(true);
       setMobileMenuOpen(false);
-      window.location.hash = page === 'home' ? '' : `#${page}`;
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      // Fade back in
+      window.location.hash = '#markets';
+      window.location.reload();
+      return;
+    }
+
+    setIsAnimating(true);
+    navTimeoutRef.current = setTimeout(() => {
+      setCurrentPage(page);
       setIsAnimating(false);
-    }, 300); // match Tailwind transition duration-300
+      setMobileMenuOpen(false);
+      if (page === 'home') {
+        window.history.replaceState({}, '', window.location.pathname);
+      } else {
+        window.location.hash = `#${page}`;
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 300);
   };
+
+  useEffect(() => {
+    return () => {
+      if (navTimeoutRef.current) {
+        clearTimeout(navTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const navItems = [
     { id: 'home', label: 'Home' },
