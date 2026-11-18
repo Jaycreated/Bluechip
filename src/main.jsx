@@ -13,13 +13,6 @@ import './styles.css';
 
 const VALID_PAGES = ['home', 'markets', 'services', 'learn', 'community', 'about', 'contact'];
 
-const HEADER_TESTIMONIALS = [
-  '“Bluechip helped me start my crypto journey with confidence!” – Jane Johnson',
-  '“Fast settlement and honest rates for USDT. No delays or ghosting.” – Daniel A.',
-  '“The Learn lessons helped me avoid a fake Telegram investment group.” – Chidinma O.',
-  '“A real person answers the hotline and explains everything clearly.” – Maxwell T.',
-];
-
 const formatReviewQuote = (review) => `“${review.quote}” – ${review.name}`;
 
 function getInitialPage() {
@@ -38,7 +31,7 @@ function App() {
   const [currency, setCurrency] = useState(() => localStorage.getItem('bluechip-currency') || 'usd');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [sparklines, setSparklines] = useState({});
-  const [headerTestimonials, setHeaderTestimonials] = useState(HEADER_TESTIMONIALS);
+  const [headerTestimonials, setHeaderTestimonials] = useState([]);
   const [isAnimating, setIsAnimating] = useState(false);
   const navTimeoutRef = useRef(null);
 
@@ -56,10 +49,7 @@ function App() {
 
   useEffect(() => {
     const loadReviews = async () => {
-      if (!supabase) {
-        setHeaderTestimonials(HEADER_TESTIMONIALS);
-        return;
-      }
+      if (!supabase) return;
 
       const { data, error } = await supabase
         .from('reviews')
@@ -204,6 +194,7 @@ function App() {
       </div>
 
       {/* ── Community Testimonial Marquee Banner ── */}
+      {headerTestimonials.length > 0 && (
       <div className="cw-banner px-4 py-2.5 bg-blue-900 text-white text-xs overflow-hidden">
         <div className="max-w-7xl mx-auto w-full flex items-center gap-3">
           <span className="cw-star text-base shrink-0">⭐</span>
@@ -227,6 +218,7 @@ function App() {
           </button>
         </div>
       </div>
+      )}
 
       {/* ── Main Persistent Header ── */}
       <header

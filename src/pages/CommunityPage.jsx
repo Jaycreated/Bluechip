@@ -2,39 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { Star, Award, Heart, MessageSquare, Sparkles } from 'lucide-react';
 import { supabase } from '../lib/supabase.js';
 
-const fallbackTestimonials = [
-  {
-    id: 'fallback-1',
-    name: 'Jane Johnson',
-    role: 'Verified Trader',
-    location: 'Lagos, Nigeria',
-    quote: 'Bluechip helped me start my crypto journey with confidence! The hotline explained TRC20 fees clearly before I transferred a single Naira.',
-    date: 'Customer of the Week',
-    rating: 5,
-    avatar: 'J'
-  },
-  {
-    id: 'fallback-2',
-    name: 'Ibrahim Bello',
-    role: 'Freelance Designer',
-    location: 'Abuja, Nigeria',
-    quote: 'Fast settlement and honest rates for USDT. No delays or ghosting like on peer-to-peer apps. When you call the hotline, a real person answers.',
-    date: 'Member since 2024',
-    rating: 5,
-    avatar: 'I'
-  },
-  {
-    id: 'fallback-3',
-    name: 'Ngozi Eze',
-    role: 'Small Business Owner',
-    location: 'Port Harcourt',
-    quote: 'The Bluechip Learn lessons helped me avoid a fake Telegram investment group that almost drained my wallet. Thank you team!',
-    date: 'Active Learner',
-    rating: 5,
-    avatar: 'N'
-  }
-];
-
 const COMMUNITY_REVIEWS_PER_PAGE = 6;
 
 const emptyForm = {
@@ -45,7 +12,7 @@ const emptyForm = {
 };
 
 export default function CommunityPage() {
-  const [allTestimonials, setAllTestimonials] = useState(fallbackTestimonials);
+  const [allTestimonials, setAllTestimonials] = useState([]);
   const [page, setPage] = useState(1);
   const [form, setForm] = useState(emptyForm);
   const [status, setStatus] = useState({ type: 'idle', message: '' });
@@ -81,6 +48,7 @@ export default function CommunityPage() {
 
   const totalPages = Math.max(1, Math.ceil(allTestimonials.length / COMMUNITY_REVIEWS_PER_PAGE));
   const visibleTestimonials = allTestimonials.slice((page - 1) * COMMUNITY_REVIEWS_PER_PAGE, page * COMMUNITY_REVIEWS_PER_PAGE);
+  const spotlight = allTestimonials[0] || null;
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -154,21 +122,34 @@ export default function CommunityPage() {
               <Star size={14} className="fill-amber-300" />
               CUSTOMER OF THE WEEK SPOTLIGHT
             </div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold leading-tight">
-              "Bluechip helped me start my crypto journey with confidence!"
-            </h2>
-            <p className="text-blue-100/80 text-sm sm:text-base mt-4 leading-relaxed font-medium">
-              Every week, the Bluechip team honors one outstanding customer who exemplifies safe crypto habits and community participation.
-            </p>
-            <div className="mt-6 flex items-center gap-3">
-              <div className="w-12 h-12 rounded-2xl bg-amber-400 text-bluechip-950 font-black text-xl grid place-items-center">
-                J
-              </div>
-              <div>
-                <p className="font-extrabold text-base text-white">Jane Johnson</p>
-                <p className="text-xs text-blue-200/70">Verified Customer · Lagos, Nigeria</p>
-              </div>
-            </div>
+            {spotlight ? (
+              <>
+                <h2 className="text-2xl sm:text-3xl font-extrabold leading-tight">
+                  "{spotlight.quote}"
+                </h2>
+                <p className="text-blue-100/80 text-sm sm:text-base mt-4 leading-relaxed font-medium">
+                  Every week, the Bluechip team honors one outstanding customer who exemplifies safe crypto habits and community participation.
+                </p>
+                <div className="mt-6 flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-2xl bg-amber-400 text-bluechip-950 font-black text-xl grid place-items-center">
+                    {spotlight.avatar}
+                  </div>
+                  <div>
+                    <p className="font-extrabold text-base text-white">{spotlight.name}</p>
+                    <p className="text-xs text-blue-200/70">Verified Customer · {spotlight.location}</p>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <>
+                <h2 className="text-2xl sm:text-3xl font-extrabold leading-tight">
+                  Be the first to share your Bluechip story.
+                </h2>
+                <p className="text-blue-100/80 text-sm sm:text-base mt-4 leading-relaxed font-medium">
+                  Every week, the Bluechip team honors one outstanding customer who exemplifies safe crypto habits and community participation. Submit your review below to get featured.
+                </p>
+              </>
+            )}
           </div>
 
           <div className="glass rounded-2xl p-6 border border-white/10 space-y-4">
@@ -327,6 +308,12 @@ export default function CommunityPage() {
           </p>
         </div>
 
+        {visibleTestimonials.length === 0 ? (
+          <div className="bg-white border border-slate-200/80 rounded-3xl p-10 text-center shadow-xs">
+            <p className="text-base font-bold text-slate-600">No reviews yet.</p>
+            <p className="text-sm text-slate-400 mt-2">Be the first to share your experience — your review will appear here instantly.</p>
+          </div>
+        ) : (
         <div className="grid md:grid-cols-3 gap-6">
           {visibleTestimonials.map((t, idx) => (
             <div
@@ -354,7 +341,9 @@ export default function CommunityPage() {
             </div>
           ))}
         </div>
+        )}
 
+        {allTestimonials.length > 0 && (
         <div className="mt-8 flex items-center justify-between gap-3 p-2 border-t border-slate-200 rounded-xl">
           <button
             type="button"
@@ -378,6 +367,7 @@ export default function CommunityPage() {
             Next
           </button>
         </div>
+        )}
       </div>
     </div>
   );

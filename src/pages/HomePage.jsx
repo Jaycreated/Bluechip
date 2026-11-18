@@ -67,12 +67,6 @@ const PREVIEW_LOSERS = [
 
 const MAX_HOME_REVIEWS = 3;
 
-const FALLBACK_REVIEWS = [
-  { id: 'fallback-home-1', name: 'Jane Johnson', location: 'Lagos, Nigeria', quote: 'Bluechip helped me start my crypto journey with confidence!', rating: 5 },
-  { id: 'fallback-home-2', name: 'Daniel A.', location: 'Abuja, Nigeria', quote: 'Fast settlement and honest rates for USDT. No delays or ghosting.', rating: 5 },
-  { id: 'fallback-home-3', name: 'Chidinma O.', location: 'Port Harcourt', quote: 'The Learn lessons helped me avoid a fake Telegram investment group.', rating: 5 },
-];
-
 function formatPrice(val, currency = 'usd') {
   if (!val) return '-';
   const prefix = currency === 'ngn' ? '₦' : '$';
@@ -90,14 +84,11 @@ function formatPrice(val, currency = 'usd') {
 export default function HomePage({ onNavigate, currency = 'usd' }) {
   const [coins, setCoins] = useState(PREVIEW_FALLBACK_COINS);
   const [selectedTradeAsset, setSelectedTradeAsset] = useState('USDT');
-  const [reviews, setReviews] = useState(FALLBACK_REVIEWS);
+  const [reviews, setReviews] = useState([]);
 
   useEffect(() => {
     const loadReviews = async () => {
-      if (!supabase) {
-        setReviews(FALLBACK_REVIEWS);
-        return;
-      }
+      if (!supabase) return;
 
       const { data, error } = await supabase
         .from('reviews')
@@ -118,9 +109,7 @@ export default function HomePage({ onNavigate, currency = 'usd' }) {
           }))
           .slice(0, MAX_HOME_REVIEWS);
 
-        if (mapped.length) {
-          setReviews(mapped);
-        }
+        setReviews(mapped);
       }
     };
 
@@ -232,11 +221,11 @@ export default function HomePage({ onNavigate, currency = 'usd' }) {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="rounded-xl border border-white/10 bg-slate-950/20 px-3 py-2.5">
                   <p className="text-[10px] uppercase tracking-[0.18em] text-blue-200/70">BTC</p>
-                  <p className="mt-1 text-lg font-extrabold text-white">1,370.53/ $</p>
+                  <p className="mt-1 text-lg font-extrabold text-white">1,390.83/ $</p>
                 </div>
                 <div className="rounded-xl border border-white/10 bg-slate-950/20 px-3 py-2.5">
                   <p className="text-[10px] uppercase tracking-[0.18em] text-blue-200/70">USDT / USDC</p>
-                  <p className="mt-1 text-lg font-extrabold text-white">1,375.55 / $</p>
+                  <p className="mt-1 text-lg font-extrabold text-white">1,396.55 / $</p>
                 </div>
               </div>
             </div>
@@ -677,6 +666,17 @@ export default function HomePage({ onNavigate, currency = 'usd' }) {
             </button>
           </div>
 
+          {reviews.length === 0 ? (
+            <div className="bg-white border border-slate-200/80 rounded-3xl p-8 text-center shadow-xs">
+              <p className="text-sm font-bold text-slate-500">No reviews yet — be the first to share your experience on the Community page.</p>
+              <button
+                onClick={() => onNavigate('community')}
+                className="mt-4 inline-flex items-center rounded-2xl bg-bluechip-600 px-5 py-2.5 text-xs font-extrabold text-white hover:bg-bluechip-700 transition cursor-pointer"
+              >
+                Leave a Review
+              </button>
+            </div>
+          ) : (
           <div className="grid md:grid-cols-3 gap-6">
             {reviews.map((review, index) => {
               const avatar = (review.name || 'A').charAt(0).toUpperCase();
@@ -729,6 +729,7 @@ export default function HomePage({ onNavigate, currency = 'usd' }) {
               );
             })}
           </div>
+          )}
         </div>
       </section>
 
