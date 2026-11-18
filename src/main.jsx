@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Sun, Moon, Menu, X, ArrowUpRight, Star } from 'lucide-react';
 import HomePage from './pages/HomePage.jsx';
@@ -8,9 +8,12 @@ import LearnPage from './pages/LearnPage.jsx';
 import CommunityPage from './pages/CommunityPage.jsx';
 import AboutPage from './pages/AboutPage.jsx';
 import ContactPage from './pages/ContactPage.jsx';
+import { supabase } from './lib/supabase.js';
 import './styles.css';
 
 const VALID_PAGES = ['home', 'markets', 'services', 'learn', 'community', 'about', 'contact'];
+
+const formatReviewQuote = (review) => `“${review.quote}” – ${review.name}`;
 
 function getInitialPage() {
   const hash = window.location.hash.replace(/^#\/?/, '').toLowerCase();
@@ -28,7 +31,9 @@ function App() {
   const [currency, setCurrency] = useState(() => localStorage.getItem('bluechip-currency') || 'usd');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [sparklines, setSparklines] = useState({});
+  const [headerTestimonials, setHeaderTestimonials] = useState([]);
   const [isAnimating, setIsAnimating] = useState(false);
+  const navTimeoutRef = useRef(null);
 
   // Sync theme
   useEffect(() => {
@@ -42,11 +47,36 @@ function App() {
     localStorage.setItem('bluechip-currency', currency);
   }, [currency]);
 
+  useEffect(() => {
+    const loadReviews = async () => {
+      if (!supabase) return;
+
+      const { data, error } = await supabase
+        .from('reviews')
+        .select('*')
+        .eq('approved', true)
+        .order('created_at', { ascending: false });
+
+      if (!error && data && data.length) {
+        const latest = data
+          .filter((item) => item.quote && item.name)
+          .map((item) => formatReviewQuote({ name: item.name, quote: item.quote }));
+
+        if (latest.length) {
+          setHeaderTestimonials(latest);
+        }
+      }
+    };
+
+    loadReviews();
+  }, []);
+
   // Browser history sync (back/forward buttons)
   useEffect(() => {
     const handlePopState = () => {
       const page = getInitialPage();
       setCurrentPage(page);
+      setIsAnimating(false);
     };
 
     window.addEventListener('popstate', handlePopState);
@@ -56,6 +86,10 @@ function App() {
       window.removeEventListener('hashchange', handlePopState);
     };
   }, []);
+
+  useEffect(() => {
+    setIsAnimating(false);
+  }, [currentPage]);
 
   // Scroll reveal animation for sections and cards
   useEffect(() => {
@@ -91,17 +125,39 @@ function App() {
   }, [currentPage, theme, currency]);
 
   const navigate = (page) => {
-    // Start fade-out animation
-    setIsAnimating(true);
-    setTimeout(() => {
-      setCurrentPage(page);
+    if (navTimeoutRef.current) {
+      clearTimeout(navTimeoutRef.current);
+    }
+
+    if (page === 'markets') {
+      setIsAnimating(true);
       setMobileMenuOpen(false);
-      window.location.hash = page === 'home' ? '' : `#${page}`;
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      // Fade back in
+      window.location.hash = '#markets';
+      window.location.reload();
+      return;
+    }
+
+    setIsAnimating(true);
+    navTimeoutRef.current = setTimeout(() => {
+      setCurrentPage(page);
       setIsAnimating(false);
-    }, 300); // match Tailwind transition duration-300
+      setMobileMenuOpen(false);
+      if (page === 'home') {
+        window.history.replaceState({}, '', window.location.pathname);
+      } else {
+        window.location.hash = `#${page}`;
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 300);
   };
+
+  useEffect(() => {
+    return () => {
+      if (navTimeoutRef.current) {
+        clearTimeout(navTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const navItems = [
     { id: 'home', label: 'Home' },
@@ -137,24 +193,32 @@ function App() {
         </div>
       </div>
 
-      {/* ── Best Customer of the Week Banner ── */}
-      <div className="cw-banner flex items-center justify-between px-4 py-2.5 bg-blue-900 text-white text-xs">
-        <div className="flex items-center gap-2 max-w-7xl mx-auto w-full">
-          <span className="cw-star text-base">⭐</span>
-          <div className="flex-1 flex flex-wrap items-center gap-x-2">
-            <span className="cw-title font-extrabold text-blue-200">Customer of the Week:</span>
-            <span className="cw-quote text-blue-50">
-              "Bluechip helped me start my crypto journey with confidence!" – <strong>Jane Johnson</strong>
-            </span>
+      {/* ── Community Testimonial Marquee Banner ── */}
+      {headerTestimonials.length > 0 && (
+      <div className="cw-banner px-4 py-2.5 bg-blue-900 text-white text-xs overflow-hidden">
+        <div className="max-w-7xl mx-auto w-full flex items-center gap-3">
+          <span className="cw-star text-base shrink-0">⭐</span>
+
+          <div className="cw-marquee flex-1 min-w-0">
+            <div className="cw-track">
+              {[...headerTestimonials, ...headerTestimonials].map((quote, index) => (
+                <span key={`${quote}-${index}`} className="cw-quote inline-flex items-center text-blue-50">
+                  <span className="cw-title font-extrabold text-blue-200 mr-2">Community:</span>
+                  {quote}
+                </span>
+              ))}
+            </div>
           </div>
+
           <button
             onClick={() => navigate('community')}
             className="text-[11px] font-extrabold text-amber-300 hover:text-white transition shrink-0 cursor-pointer hidden sm:inline"
           >
-            Read Testimonial →
+            Read More →
           </button>
         </div>
       </div>
+      )}
 
       {/* ── Main Persistent Header ── */}
       <header

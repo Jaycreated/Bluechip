@@ -16,6 +16,32 @@ import {
   ArrowDownRight, 
   Send 
 } from 'lucide-react';
+import { supabase } from '../lib/supabase.js';
+
+const makeFallbackToken = (symbol = 'CRYPTO') => {
+  const text = String(symbol).toUpperCase().slice(0, 2) || 'CR';
+  const palette = {
+    BTC: '#f59e0b',
+    ETH: '#627eea',
+    SOL: '#14f1d9',
+    BNB: '#f3ba2f',
+    USDT: '#26a17b',
+    XRP: '#2e8cff',
+    DOGE: '#f4c20d',
+    PEPE: '#7c3aed',
+    WLD: '#06b6d4',
+    TIA: '#f97316',
+    DEFAULT: '#2563eb'
+  };
+  const fill = palette[String(symbol).toUpperCase()] || palette.DEFAULT;
+  const svg = `
+    <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'>
+      <rect width='64' height='64' rx='18' fill='${fill}'/>
+      <text x='50%' y='54%' text-anchor='middle' font-size='24' font-weight='700' fill='white' font-family='Arial, sans-serif'>${text}</text>
+    </svg>
+  `;
+  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+};
 
 const PREVIEW_FALLBACK_COINS = [
   { id: 'bitcoin', symbol: 'BTC', name: 'Bitcoin', price: 96800, change: 4.15, icon: 'https://assets.coingecko.com/coins/images/1/large/bitcoin.png' },
@@ -39,6 +65,8 @@ const PREVIEW_LOSERS = [
   { symbol: 'SEI', name: 'Sei', change: -11.90, price: 0.46, icon: 'https://assets.coingecko.com/coins/images/28205/large/Sei_Logo_-_Transparent.png' },
 ];
 
+const MAX_HOME_REVIEWS = 3;
+
 function formatPrice(val, currency = 'usd') {
   if (!val) return '-';
   const prefix = currency === 'ngn' ? '₦' : '$';
@@ -56,33 +84,103 @@ function formatPrice(val, currency = 'usd') {
 export default function HomePage({ onNavigate, currency = 'usd' }) {
   const [coins, setCoins] = useState(PREVIEW_FALLBACK_COINS);
   const [selectedTradeAsset, setSelectedTradeAsset] = useState('USDT');
+  const [reviews, setReviews] = useState([]);
 
-  // Load latest cached market data if available
   useEffect(() => {
-    try {
-      const cached = JSON.parse(localStorage.getItem(`bluechip_cmc_market_data_v2_${currency}`));
-      if (cached?.data?.length) {
-        const topSymbols = ['BTC', 'ETH', 'SOL', 'BNB', 'USDT', 'XRP', 'DOGE'];
-        const mapped = [];
-        topSymbols.forEach((sym) => {
-          const match = cached.data.find((c) => c.symbol.toUpperCase() === sym);
-          if (match) {
-            mapped.push({
-              id: match.id,
-              symbol: match.symbol.toUpperCase(),
-              name: match.name,
-              price: match.current_price,
-              change: match.price_change_percentage_24h_in_currency ?? match.price_change_percentage_24h ?? 0,
-              icon: match.image
-            });
-          }
-        });
-        if (mapped.length) setCoins(mapped);
+    const loadReviews = async () => {
+      if (!supabase) return;
+
+      const { data, error } = await supabase
+        .from('reviews')
+        .select('*')
+        .eq('approved', true)
+        .order('created_at', { ascending: false })
+        .limit(MAX_HOME_REVIEWS + 3);
+
+      if (!error && data && data.length) {
+        const mapped = data
+          .filter((item) => item.quote && item.name)
+          .map((item) => ({
+            id: item.id,
+            name: item.name,
+            location: item.location || 'Nigeria',
+            quote: item.quote,
+            rating: Number(item.rating) || 5,
+          }))
+          .slice(0, MAX_HOME_REVIEWS);
+
+        setReviews(mapped);
       }
-    } catch (e) {
-      // keep fallback
-    }
+    };
+
+    loadReviews();
+  }, []);
+
+  // Keep the homepage preview in sync with the same live CoinGecko feed used on the markets page.
+  useEffect(() => {
+    const mapPreviewData = (data) => {
+      const topSymbols = ['BTC', 'ETH', 'SOL', 'BNB', 'USDT', 'XRP', 'DOGE'];
+      const mapped = [];
+
+      topSymbols.forEach((sym) => {
+        const match = data.find((c) => c.symbol.toUpperCase() === sym);
+        if (match) {
+          mapped.push({
+            id: match.id,
+            symbol: match.symbol.toUpperCase(),
+            name: match.name,
+            price: match.current_price,
+            change: match.price_change_percentage_24h_in_currency ?? match.price_change_percentage_24h ?? 0,
+            icon: match.image
+          });
+        }
+      });
+
+      return mapped;
+    };
+
+    const loadPreview = async () => {
+      const cacheKey = `bluechip_cmc_market_data_v2_${currency}`;
+
+      try {
+        const cached = JSON.parse(localStorage.getItem(cacheKey));
+        if (cached?.data?.length && Date.now() - (cached.timestamp || 0) < 3 * 60 * 1000) {
+          const mapped = mapPreviewData(cached.data);
+          if (mapped.length) {
+            setCoins(mapped);
+            return;
+          }
+        }
+      } catch (e) {
+        // ignore cache parse errors and load live data instead
+      }
+
+      try {
+        const url = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=${currency}&order=market_cap_desc&per_page=100&page=1&sparkline=true&price_change_percentage=1h,24h,7d`;
+        const res = await fetch(url, { headers: { accept: 'application/json' } });
+
+        if (!res.ok) {
+          throw new Error(`CoinGecko HTTP ${res.status}`);
+        }
+
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > 0) {
+          const mapped = mapPreviewData(data);
+          if (mapped.length) {
+            setCoins(mapped);
+            localStorage.setItem(cacheKey, JSON.stringify({ data, timestamp: Date.now() }));
+          }
+        }
+      } catch (e) {
+        setCoins(PREVIEW_FALLBACK_COINS);
+      }
+    };
+
+    loadPreview();
   }, [currency]);
+
+  const liveBtcPrice = coins.find((coin) => coin.symbol === 'BTC')?.price ?? PREVIEW_FALLBACK_COINS.find((coin) => coin.symbol === 'BTC').price;
+  const liveUsdtPrice = coins.find((coin) => coin.symbol === 'USDT')?.price ?? PREVIEW_FALLBACK_COINS.find((coin) => coin.symbol === 'USDT').price;
 
   return (
     <div>
@@ -100,12 +198,37 @@ export default function HomePage({ onNavigate, currency = 'usd' }) {
             </div>
 
             <h1 className="mt-6 text-4xl sm:text-5xl lg:text-[60px] leading-[1.08] font-extrabold tracking-tight">
-              Your trusted crypto <span className="text-blue-300">hotline</span> in Nigeria.
+              Premium OTC Crypto for Nigerians.
             </h1>
 
-            <p className="mt-6 max-w-xl text-blue-100/85 text-base sm:text-lg leading-8 font-medium">
-              Buy, sell and understand crypto with more clarity. Straightforward support for your next move, plus practical education to help you make informed decisions.
+            <p className="mt-3 text-lg sm:text-2xl font-bold text-blue-200 tracking-tight">
+              Fast. Clear. Educational.
             </p>
+
+            <p className="mt-6 max-w-xl text-blue-100/85 text-base sm:text-lg leading-8 font-medium">
+              Buy and sell crypto with speed and clarity, plus practical education to help you make better decisions.
+            </p>
+
+            <div className="mt-8 rounded-2xl border border-white/15 bg-white/5 p-4 backdrop-blur-sm max-w-md">
+              <div className="flex items-center justify-between gap-3 mb-3">
+                <p className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-blue-200/80">Bluechip Trading Rate</p>
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/30 bg-emerald-500/10 px-2 py-1 text-[10px] font-bold text-emerald-300">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
+                  live
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="rounded-xl border border-white/10 bg-slate-950/20 px-3 py-2.5">
+                  <p className="text-[10px] uppercase tracking-[0.18em] text-blue-200/70">BTC</p>
+                  <p className="mt-1 text-lg font-extrabold text-white">1,390.83/ $</p>
+                </div>
+                <div className="rounded-xl border border-white/10 bg-slate-950/20 px-3 py-2.5">
+                  <p className="text-[10px] uppercase tracking-[0.18em] text-blue-200/70">USDT / USDC</p>
+                  <p className="mt-1 text-lg font-extrabold text-white">1,396.55 / $</p>
+                </div>
+              </div>
+            </div>
 
             <div className="mt-8 flex flex-col sm:flex-row gap-3">
               <button
@@ -142,6 +265,14 @@ export default function HomePage({ onNavigate, currency = 'usd' }) {
                 </span>
               </div>
 
+              <a
+                href="mailto:support@thebluechipexchange.com"
+                className="group mb-5 inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-[11px] font-bold text-blue-100 hover:bg-white/10 transition"
+              >
+                <span className="text-blue-200">✉</span>
+                support@thebluechipexchange.com
+              </a>
+
               {/* Quick trade inquiry trigger */}
               <div className="space-y-3">
                 <p className="text-xs text-blue-100/70 font-semibold uppercase tracking-wider">Quick Asset Rate Check</p>
@@ -165,7 +296,7 @@ export default function HomePage({ onNavigate, currency = 'usd' }) {
                   href={`https://wa.me/2347037629149?text=${encodeURIComponent(`Hello Bluechip Hotline (+234 703 762 9149), I want to trade ${selectedTradeAsset}. Please confirm today's exchange rate.`)}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full py-3.5 bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-xs rounded-xl flex items-center justify-center gap-2 transition shadow-lg shadow-emerald-500/20 mt-2"
+                  className="w-full p-3.5 bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-xs rounded-xl flex items-center justify-center gap-2 transition shadow-lg shadow-emerald-500/20 mt-2"
                 >
                   Ask Today's {selectedTradeAsset} Rate on WhatsApp (+234 703 762 9149) ↗
                 </a>
@@ -228,7 +359,7 @@ export default function HomePage({ onNavigate, currency = 'usd' }) {
                     className="w-8 h-8 rounded-full object-contain shrink-0"
                     onError={(e) => {
                       e.target.onerror = null;
-                      e.target.src = 'https://assets.coingecko.com/coins/images/1/large/bitcoin.png';
+                      e.target.src = makeFallbackToken(c.symbol || c.name);
                     }}
                   />
                   <div className="truncate">
@@ -275,7 +406,15 @@ export default function HomePage({ onNavigate, currency = 'usd' }) {
               {PREVIEW_GAINERS.map((g) => (
                 <div key={g.symbol} className="py-2.5 flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
-                    <img src={g.icon} alt={g.name} className="w-6 h-6 rounded-full" />
+                    <img
+                      src={g.icon}
+                      alt={g.name}
+                      className="w-6 h-6 rounded-full"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = makeFallbackToken(g.symbol || g.name);
+                      }}
+                    />
                     <span className="font-extrabold text-xs text-bluechip-950">{g.name} ({g.symbol})</span>
                   </div>
                   <div className="text-right">
@@ -307,7 +446,15 @@ export default function HomePage({ onNavigate, currency = 'usd' }) {
               {PREVIEW_LOSERS.map((l) => (
                 <div key={l.symbol} className="py-2.5 flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
-                    <img src={l.icon} alt={l.name} className="w-6 h-6 rounded-full" />
+                    <img
+                      src={l.icon}
+                      alt={l.name}
+                      className="w-6 h-6 rounded-full"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = makeFallbackToken(l.symbol || l.name);
+                      }}
+                    />
                     <span className="font-extrabold text-xs text-bluechip-950">{l.name} ({l.symbol})</span>
                   </div>
                   <div className="text-right">
@@ -362,6 +509,14 @@ export default function HomePage({ onNavigate, currency = 'usd' }) {
                   Chat Hotline on WhatsApp ↗
                 </a>
               </div>
+
+              <a
+                href="mailto:support@thebluechipexchange.com"
+                className="mt-4 inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-[11px] font-bold text-bluechip-700 hover:bg-slate-50 transition"
+              >
+                <span className="text-base">✉</span>
+                support@thebluechipexchange.com
+              </a>
             </div>
 
             {/* Right: Supported Assets Pill Showcase */}
@@ -421,6 +576,27 @@ export default function HomePage({ onNavigate, currency = 'usd' }) {
             >
               Open Academy &amp; Watch Videos →
             </button>
+
+            <div className="mt-8 rounded-3xl border border-slate-200 bg-gradient-to-r from-slate-50 to-bluechip-50 p-5">
+              <p className="text-[11px] font-black uppercase tracking-[0.18em] text-bluechip-600">Keep learning</p>
+              <p className="mt-2 text-sm font-bold text-bluechip-950">Speak with the Bluechip team to get more exclusive lessons.</p>
+              <div className="mt-4 flex flex-col sm:flex-row gap-3">
+                <a
+                  href="https://wa.me/2347037629149?text=Hello%20Bluechip,%20I%20want%20to%20keep%20learning%20about%20crypto."
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center rounded-xl bg-bluechip-900 px-4 py-2.5 text-[11px] font-extrabold text-white hover:bg-bluechip-800 transition"
+                >
+                  WhatsApp: +234 703 762 9149
+                </a>
+                <a
+                  href="mailto:support@thebluechipexchange.com"
+                  className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-[11px] font-extrabold text-bluechip-700 hover:bg-slate-50 transition"
+                >
+                  Email: support@thebluechipexchange.com
+                </a>
+              </div>
+            </div>
           </div>
 
           {/* Right Video Teaser Card */}
@@ -428,21 +604,47 @@ export default function HomePage({ onNavigate, currency = 'usd' }) {
             onClick={() => onNavigate('learn')}
             className="bg-bluechip-950 text-white rounded-3xl p-6 sm:p-8 shadow-xl border border-white/10 cursor-pointer group"
           >
-            <div className="relative aspect-video rounded-2xl bg-black/60 border border-white/10 flex items-center justify-center p-4 text-center group-hover:border-blue-400/40 transition">
-              <div className="w-14 h-14 rounded-full bg-bluechip-600 text-white grid place-items-center shadow-lg group-hover:scale-110 transition">
-                <Play size={24} className="translate-x-0.5" />
+            <div className="relative aspect-video rounded-2xl bg-black/60 border border-white/10 overflow-hidden flex flex-col justify-center items-center p-6 text-center group-hover:border-blue-400/40 transition">
+              <div className="w-16 h-16 rounded-full bg-slate-200/10 border border-white/15 text-white grid place-items-center shadow-xl group-hover:scale-105 transition">
+                <Play size={28} className="text-blue-200 opacity-60 translate-x-0.5" />
               </div>
-              <span className="absolute bottom-3 left-3 text-[10px] bg-black/70 px-2.5 py-1 rounded text-white font-bold">
-                Episode 1 Preview
+              <p className="font-extrabold text-base text-white mt-5">Coming Soon</p>
+              <span className="text-xs text-blue-200/70 mt-1">Short crypto education videos are being prepared for launch.</span>
+              <span className="absolute bottom-3 right-3 text-[10px] bg-white/10 px-2.5 py-1 rounded-md text-white/80 font-bold border border-white/10">
+                COMING SOON
               </span>
             </div>
             <h3 className="font-extrabold text-lg mt-4 text-white group-hover:text-blue-300 transition">
-              Crypto for Complete Beginners in Nigeria
+              Crypto education videos are on the way
             </h3>
             <p className="text-xs text-blue-200/70 mt-1">
-              Watch Vicky and the team explain wallets, seed phrases, and network fees step by step.
+              Learn wallets, scam prevention, stablecoins, and safer crypto habits with bite-sized lessons for beginners in Nigeria.
             </p>
           </div>
+        </div>
+      </section>
+
+      {/* ── Roadmap ── */}
+      <section className="max-w-7xl mx-auto px-4 py-16">
+        <div className="mb-8">
+          <p className="text-bluechip-600 uppercase tracking-[.18em] text-xs font-extrabold">Roadmap</p>
+          <h2 className="text-3xl font-extrabold text-bluechip-950 mt-2">Where Bluechip is going next</h2>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-6">
+          {[
+            { label: 'Current', title: 'Premium OTC with education', text: 'Fast, direct crypto buying and selling support. Clear guidance and safe decision-making first.' },
+            { label: 'Next', title: 'Secure storage product (ledger)', text: 'A safer custody option built for users who want more control over their assets and recovery process.' },
+            { label: 'Later', title: 'Full exchange platform', text: 'A wider trading experience built on trust, liquidity, and strong user education.' },
+          ].map((step) => (
+            <div key={step.label} className="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-soft">
+              <span className="inline-flex items-center rounded-full bg-bluechip-100 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-bluechip-700">
+                {step.label}
+              </span>
+              <h3 className="mt-4 text-xl font-extrabold text-bluechip-950">{step.title}</h3>
+              <p className="mt-3 text-sm text-slate-500 leading-relaxed">{step.text}</p>
+            </div>
+          ))}
         </div>
       </section>
 
@@ -464,70 +666,70 @@ export default function HomePage({ onNavigate, currency = 'usd' }) {
             </button>
           </div>
 
+          {reviews.length === 0 ? (
+            <div className="bg-white border border-slate-200/80 rounded-3xl p-8 text-center shadow-xs">
+              <p className="text-sm font-bold text-slate-500">No reviews yet — be the first to share your experience on the Community page.</p>
+              <button
+                onClick={() => onNavigate('community')}
+                className="mt-4 inline-flex items-center rounded-2xl bg-bluechip-600 px-5 py-2.5 text-xs font-extrabold text-white hover:bg-bluechip-700 transition cursor-pointer"
+              >
+                Leave a Review
+              </button>
+            </div>
+          ) : (
           <div className="grid md:grid-cols-3 gap-6">
-            {/* Jane Doe Spotlight */}
-            <div className="bg-gradient-to-br from-bluechip-950 to-bluechip-900 text-white rounded-3xl p-6 shadow-md flex flex-col justify-between">
-              <div>
-                <span className="text-[10px] font-black uppercase tracking-wider text-amber-300 bg-amber-400/20 px-2 py-0.5 rounded">
-                  ⭐ Customer of the Week
-                </span>
-                <p className="mt-4 text-sm font-bold text-blue-50 leading-relaxed italic">
-                  "Bluechip helped me start my crypto journey with confidence! The hotline explained TRC20 fees clearly before I transferred a single Naira."
-                </p>
-              </div>
-              <div className="mt-6 pt-4 border-t border-white/10 flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-amber-400 text-bluechip-950 font-black text-sm grid place-items-center">
-                  J
-                </div>
-                <div>
-                  <p className="font-extrabold text-xs text-white">John Johnson</p>
-                  <p className="text-[10px] text-blue-200/70">Verified Customer · Lagos</p>
-                </div>
-              </div>
-            </div>
+            {reviews.map((review, index) => {
+              const avatar = (review.name || 'A').charAt(0).toUpperCase();
+              const isFeatured = index === 0;
 
-            {/* Testimonial 2 */}
-            <div className="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-xs flex flex-col justify-between">
-              <div>
-                <div className="flex items-center gap-1 text-amber-400 mb-2">
-                  {[...Array(5)].map((_, i) => <Star key={i} size={14} className="fill-amber-400" />)}
-                </div>
-                <p className="text-xs text-slate-600 leading-relaxed italic font-medium">
-                  "Fast settlement and honest rates for USDT. No delays or ghosting like on peer-to-peer apps. When you call the hotline, a real person answers."
-                </p>
-              </div>
-              <div className="mt-6 pt-4 border-t border-slate-100 flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-bluechip-100 text-bluechip-800 font-extrabold text-sm grid place-items-center">
-                  I
-                </div>
-                <div>
-                  <p className="font-extrabold text-xs text-bluechip-950">Ibrahim Bello</p>
-                  <p className="text-[10px] text-slate-400">Abuja, Nigeria</p>
-                </div>
-              </div>
-            </div>
+              if (isFeatured) {
+                return (
+                  <div key={review.id || review.name} className="bg-gradient-to-br from-bluechip-950 to-bluechip-900 text-white rounded-3xl p-6 shadow-md flex flex-col justify-between">
+                    <div>
+                      <span className="text-[10px] font-black uppercase tracking-wider text-amber-300 bg-amber-400/20 px-2 py-0.5 rounded">
+                        ⭐ Customer of the Week
+                      </span>
+                      <p className="mt-4 text-sm font-bold text-blue-50 leading-relaxed italic">
+                        "{review.quote}"
+                      </p>
+                    </div>
+                    <div className="mt-6 pt-4 border-t border-white/10 flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-xl bg-amber-400 text-bluechip-950 font-black text-sm grid place-items-center">
+                        {avatar}
+                      </div>
+                      <div>
+                        <p className="font-extrabold text-xs text-white">{review.name}</p>
+                        <p className="text-[10px] text-blue-200/70">Verified Customer · {review.location}</p>
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
 
-            {/* Testimonial 3 */}
-            <div className="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-xs flex flex-col justify-between">
-              <div>
-                <div className="flex items-center gap-1 text-amber-400 mb-2">
-                  {[...Array(5)].map((_, i) => <Star key={i} size={14} className="fill-amber-400" />)}
+              return (
+                <div key={review.id || review.name} className="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-xs flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center gap-1 text-amber-400 mb-2">
+                      {[...Array(review.rating || 5)].map((_, starIndex) => <Star key={`${review.id || review.name}-${starIndex}`} size={14} className="fill-amber-400" />)}
+                    </div>
+                    <p className="text-xs text-slate-600 leading-relaxed italic font-medium">
+                      "{review.quote}"
+                    </p>
+                  </div>
+                  <div className="mt-6 pt-4 border-t border-slate-100 flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-bluechip-100 text-bluechip-800 font-extrabold text-sm grid place-items-center">
+                      {avatar}
+                    </div>
+                    <div>
+                      <p className="font-extrabold text-xs text-bluechip-950">{review.name}</p>
+                      <p className="text-[10px] text-slate-400">{review.location}</p>
+                    </div>
+                  </div>
                 </div>
-                <p className="text-xs text-slate-600 leading-relaxed italic font-medium">
-                  "The Bluechip Learn lessons helped me avoid a fake Telegram investment group that almost drained my wallet. Thank you team!"
-                </p>
-              </div>
-              <div className="mt-6 pt-4 border-t border-slate-100 flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-bluechip-100 text-bluechip-800 font-extrabold text-sm grid place-items-center">
-                  N
-                </div>
-                <div>
-                  <p className="font-extrabold text-xs text-bluechip-950">Ngozi Eze</p>
-                  <p className="text-[10px] text-slate-400">Port Harcourt</p>
-                </div>
-              </div>
-            </div>
+              );
+            })}
           </div>
+          )}
         </div>
       </section>
 
@@ -551,13 +753,12 @@ export default function HomePage({ onNavigate, currency = 'usd' }) {
           </button>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3.5 mb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5 mb-8">
           {[
-            { name: 'Ridwan Yusuf', role: 'Founder', initial: 'R', color: 'bg-blue-600' },
-            { name: 'Johnson John', role: 'Dev', initial: 'J', color: 'bg-indigo-600' },
-            { name: 'Victoria Shima', role: 'Community', initial: 'V', color: 'bg-emerald-600' },
-            { name: 'Victoria Shima', role: 'Social Media', initial: 'V', color: 'bg-amber-600' },
-            { name: 'Ridwan Yusuf', role: 'CFO', initial: 'R', color: 'bg-rose-600' },
+            { name: 'Ridwan Yusuf', role: 'Former Founder + CFO', initial: 'R', color: 'bg-blue-600' },
+            { name: 'Johnson John', role: 'Lead Developer', initial: 'J', color: 'bg-indigo-600' },
+            { name: 'Victoria Shima', role: 'Community + Social Media', initial: 'V', color: 'bg-emerald-600' },
+            { name: 'Bluechip Team', role: 'Human Support', initial: 'B', color: 'bg-rose-600' },
           ].map((m) => (
             <div
               key={m.name}

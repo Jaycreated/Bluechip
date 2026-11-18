@@ -4,6 +4,31 @@ import { Search, TrendingUp, TrendingDown, RefreshCw, Flame, ArrowUpRight, Arrow
 const CACHE_KEY = 'bluechip_cmc_market_data_v2';
 const CACHE_TTL = 3 * 60 * 1000; // 3 minutes cache
 
+function getFallbackCoinImage(symbol = 'CRYPTO') {
+  const text = String(symbol).toUpperCase().slice(0, 2) || 'CR';
+  const palette = {
+    BTC: '#f59e0b',
+    ETH: '#627eea',
+    SOL: '#14f1d9',
+    BNB: '#f3ba2f',
+    USDT: '#26a17b',
+    XRP: '#2e8cff',
+    DOGE: '#f4c20d',
+    PEPE: '#7c3aed',
+    WLD: '#06b6d4',
+    TIA: '#f97316',
+    DEFAULT: '#2563eb'
+  };
+  const fill = palette[String(symbol).toUpperCase()] || palette.DEFAULT;
+  const svg = `
+    <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'>
+      <rect width='64' height='64' rx='18' fill='${fill}'/>
+      <text x='50%' y='54%' text-anchor='middle' font-size='24' font-weight='700' fill='white' font-family='Arial, sans-serif'>${text}</text>
+    </svg>
+  `;
+  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+}
+
 // 25+ realistic default coins (both big gainers and losers) for instant and fallback rendering
 const FALLBACK_COINS = [
   // Big Gainers
@@ -117,41 +142,62 @@ function Sparkline({ data, isPositive }) {
   );
 }
 
-// Dedicated Top 10 Ranked Mini-Table for Gainers or Losers
-function Top10Card({ title, icon, subtitle, coins, type = 'gainer', currency }) {
+// Dedicated Ranked Mini-Table for Gainers or Losers
+function Top10Card({ title, icon, subtitle, coins, type = 'gainer', currency, onCoinSelect }) {
   const isGainer = type === 'gainer';
   const headerBg = isGainer ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' : 'bg-rose-500/10 text-rose-600 border-rose-500/20';
   const badgeColor = isGainer ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200';
+  const [visibleCount, setVisibleCount] = useState(10);
+  const options = [10, 25, 50, 100];
+  const displayCoins = coins.slice(0, Math.min(visibleCount, coins.length));
+
+  useEffect(() => {
+    setVisibleCount((current) => Math.min(current, coins.length || 10));
+  }, [coins.length]);
 
   return (
     <div className="bg-white border border-slate-200/80 rounded-3xl p-5 sm:p-6 shadow-soft flex flex-col justify-between transition hover:border-slate-300">
       <div>
         {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-3">
-          <div className="flex items-center gap-3">
+        <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-3 gap-3">
+          <div className="flex items-center gap-3 min-w-0">
             <div className={`w-10 h-10 rounded-2xl grid place-items-center border ${headerBg}`}>
               {icon}
             </div>
-            <div>
+            <div className="min-w-0">
               <h3 className="font-extrabold text-bluechip-950 text-base sm:text-lg tracking-tight">{title}</h3>
               <p className="text-xs text-slate-400 font-medium">{subtitle}</p>
             </div>
           </div>
-          <span className={`text-[11px] font-extrabold px-2.5 py-1 rounded-full border ${badgeColor}`}>
-            Top 10 Today
-          </span>
+
+          <div className="flex items-center gap-2 shrink-0">
+            <label className="sr-only">Select visible count</label>
+            <select
+              value={visibleCount}
+              onChange={(e) => setVisibleCount(Number(e.target.value))}
+              className="rounded-xl border border-slate-200 bg-slate-50 px-2 py-1.5 text-[10px] font-extrabold text-slate-700 focus:outline-none focus:ring-2 focus:ring-bluechip-500/20"
+            >
+              {options.map((option) => (
+                <option key={option} value={option}>Top {option}</option>
+              ))}
+            </select>
+            <span className={`text-[11px] font-extrabold px-2.5 py-1 rounded-full border ${badgeColor}`}>
+              Top {visibleCount} Today
+            </span>
+          </div>
         </div>
 
-        {/* Top 10 List */}
+        {/* Top Movers List */}
         <div className="divide-y divide-slate-100">
-          {coins.slice(0, 10).map((coin, index) => {
+          {displayCoins.map((coin, index) => {
             const change24h = coin.price_change_percentage_24h_in_currency ?? coin.price_change_percentage_24h ?? 0;
             const tradeLink = `https://wa.me/2347037629149?text=${encodeURIComponent(`Hello Bluechip, I want to trade ${coin.name} (${coin.symbol.toUpperCase()}). Please give me current rates.`)}`;
 
             return (
               <div
                 key={coin.id}
-                className="py-2.5 flex items-center justify-between gap-3 hover:bg-slate-50/70 px-2 rounded-xl transition group"
+                onClick={() => onCoinSelect?.(coin)}
+                className="py-2.5 flex items-center justify-between gap-3 hover:bg-slate-50/70 px-2 rounded-xl transition group cursor-pointer"
               >
                 {/* Left: Rank & Coin info */}
                 <div className="flex items-center gap-3 min-w-0">
@@ -164,7 +210,7 @@ function Top10Card({ title, icon, subtitle, coins, type = 'gainer', currency }) 
                     className="w-7 h-7 rounded-full object-contain shrink-0 shadow-2xs"
                     onError={(e) => {
                       e.target.onerror = null;
-                      e.target.src = 'https://assets.coingecko.com/coins/images/1/large/bitcoin.png';
+                      e.target.src = getFallbackCoinImage(coin.symbol || coin.name);
                     }}
                   />
                   <div className="truncate">
@@ -197,6 +243,7 @@ function Top10Card({ title, icon, subtitle, coins, type = 'gainer', currency }) 
                     href={tradeLink}
                     target="_blank"
                     rel="noopener noreferrer"
+                    onClick={(event) => event.stopPropagation()}
                     className="hidden sm:inline-flex items-center px-2.5 py-1 text-[11px] font-bold rounded-lg bg-bluechip-50 text-bluechip-700 hover:bg-bluechip-600 hover:text-white transition shadow-2xs"
                     title={`Trade ${coin.symbol.toUpperCase()}`}
                   >
@@ -217,7 +264,7 @@ function Top10Card({ title, icon, subtitle, coins, type = 'gainer', currency }) 
   );
 }
 
-export default function MarketTable({ currency = 'usd', onCurrencyToggle, onSparklinesUpdate }) {
+export default function MarketTable({ currency = 'usd', onCurrencyToggle, onSparklinesUpdate, onCoinSelect }) {
   const [coins, setCoins] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -260,7 +307,7 @@ export default function MarketTable({ currency = 'usd', onCurrencyToggle, onSpar
     }
 
     try {
-      const url = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=${currency}&order=market_cap_desc&per_page=50&page=1&sparkline=true&price_change_percentage=1h,24h,7d`;
+      const url = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=${currency}&order=market_cap_desc&per_page=100&page=1&sparkline=true&price_change_percentage=1h,24h,7d`;
       const res = await fetch(url, { headers: { accept: 'application/json' } });
       
       if (!res.ok) {
@@ -344,6 +391,30 @@ export default function MarketTable({ currency = 'usd', onCurrencyToggle, onSpar
       .slice(0, 10);
   }, [coins]);
 
+  const top100Gainers = useMemo(() => {
+    if (!coins.length) return [];
+    return [...coins]
+      .filter((c) => typeof (c.price_change_percentage_24h_in_currency ?? c.price_change_percentage_24h) === 'number')
+      .sort((a, b) => {
+        const changeA = a.price_change_percentage_24h_in_currency ?? a.price_change_percentage_24h ?? 0;
+        const changeB = b.price_change_percentage_24h_in_currency ?? b.price_change_percentage_24h ?? 0;
+        return changeB - changeA;
+      })
+      .slice(0, 100);
+  }, [coins]);
+
+  const top100Losers = useMemo(() => {
+    if (!coins.length) return [];
+    return [...coins]
+      .filter((c) => typeof (c.price_change_percentage_24h_in_currency ?? c.price_change_percentage_24h) === 'number')
+      .sort((a, b) => {
+        const changeA = a.price_change_percentage_24h_in_currency ?? a.price_change_percentage_24h ?? 0;
+        const changeB = b.price_change_percentage_24h_in_currency ?? b.price_change_percentage_24h ?? 0;
+        return changeA - changeB;
+      })
+      .slice(0, 100);
+  }, [coins]);
+
   // Filtered Coins for the main CoinMarketCap table
   const filteredCoins = useMemo(() => {
     let list = [...coins];
@@ -421,7 +492,8 @@ export default function MarketTable({ currency = 'usd', onCurrencyToggle, onSpar
               return (
                 <div
                   key={coin.id}
-                  className="coin-scroll-card bg-white border border-slate-200/80 rounded-2xl p-4 shadow-xs hover:shadow-soft transition flex flex-col justify-between"
+                  onClick={() => onCoinSelect?.(coin)}
+                  className="coin-scroll-card bg-white border border-slate-200/80 rounded-2xl p-4 shadow-xs hover:shadow-soft transition flex flex-col justify-between cursor-pointer"
                 >
                   <div className="flex items-center gap-2.5">
                     <img
@@ -430,7 +502,7 @@ export default function MarketTable({ currency = 'usd', onCurrencyToggle, onSpar
                       className="w-8 h-8 rounded-full object-contain shrink-0 shadow-2xs"
                       onError={(e) => {
                         e.target.onerror = null;
-                        e.target.src = 'https://assets.coingecko.com/coins/images/1/large/bitcoin.png';
+                        e.target.src = getFallbackCoinImage(coin.symbol || coin.name);
                       }}
                     />
                     <div className="truncate">
@@ -462,9 +534,9 @@ export default function MarketTable({ currency = 'usd', onCurrencyToggle, onSpar
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
           <div>
             <h3 className="text-xl font-extrabold text-bluechip-950 tracking-tight flex items-center gap-2">
-              <span>🔥 Top 10 Gainers &amp; Losers of the Day</span>
+              <span>🔥 Top Gainers &amp; Losers of the Day</span>
             </h3>
-            <p className="text-xs text-slate-500 mt-0.5">The 10 biggest percentage climbers and decliners in the last 24 hours.</p>
+            <p className="text-xs text-slate-500 mt-0.5">The biggest percentage climbers and decliners in the last 24 hours. Start with the first 10, then expand for more.</p>
           </div>
 
           {/* Mobile switcher (Show Gainers / Show Losers / Show Both) */}
@@ -494,24 +566,26 @@ export default function MarketTable({ currency = 'usd', onCurrencyToggle, onSpar
           {/* Top 10 Gainers Card */}
           {(moversView === 'both' || moversView === 'gainers') && (
             <Top10Card
-              title="Top 10 Gainers"
+              title="Top Gainers"
               icon={<TrendingUp size={20} />}
               subtitle="Highest percentage increase in 24 hours"
-              coins={top10Gainers}
+              coins={top100Gainers}
               type="gainer"
               currency={currency}
+              onCoinSelect={onCoinSelect}
             />
           )}
 
           {/* Top 10 Losers Card */}
           {(moversView === 'both' || moversView === 'losers') && (
             <Top10Card
-              title="Top 10 Losers"
+              title="Top Losers"
               icon={<TrendingDown size={20} />}
               subtitle="Biggest percentage dip in 24 hours"
-              coins={top10Losers}
+              coins={top100Losers}
               type="loser"
               currency={currency}
+              onCoinSelect={onCoinSelect}
             />
           )}
         </div>
@@ -644,7 +718,8 @@ export default function MarketTable({ currency = 'usd', onCurrencyToggle, onSpar
                   return (
                     <tr
                       key={coin.id}
-                      className="cmc-table-row hover:bg-slate-50/80 transition group"
+                      onClick={() => onCoinSelect?.(coin)}
+                      className="cmc-table-row hover:bg-slate-50/80 transition group cursor-pointer"
                     >
                       {/* Rank */}
                       <td className="py-3.5 px-4 text-center font-bold text-slate-400 text-xs">
@@ -652,7 +727,7 @@ export default function MarketTable({ currency = 'usd', onCurrencyToggle, onSpar
                       </td>
 
                       {/* Name & Icon */}
-                      <td className="py-3.5 px-4">
+                      <td className="py-3.5 px-4" onClick={() => onCoinSelect?.(coin)}>
                         <div className="flex items-center gap-3">
                           <img
                             src={coin.image}
@@ -660,7 +735,7 @@ export default function MarketTable({ currency = 'usd', onCurrencyToggle, onSpar
                             className="w-7 h-7 rounded-full object-contain shrink-0 shadow-2xs"
                             onError={(e) => {
                               e.target.onerror = null;
-                              e.target.src = 'https://assets.coingecko.com/coins/images/1/large/bitcoin.png';
+                              e.target.src = getFallbackCoinImage(coin.symbol || coin.name);
                             }}
                           />
                           <div>
@@ -734,6 +809,7 @@ export default function MarketTable({ currency = 'usd', onCurrencyToggle, onSpar
                           href={tradeLink}
                           target="_blank"
                           rel="noopener noreferrer"
+                          onClick={(event) => event.stopPropagation()}
                           className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-extrabold bg-bluechip-50 text-bluechip-700 hover:bg-bluechip-600 hover:text-white transition shadow-2xs"
                         >
                           Trade <ArrowUpRight size={12} />

@@ -5,38 +5,24 @@ export default function AboutPage() {
   const TEAM = [
     {
       name: 'Ridwan Yusuf',
-      role: 'Founder & Vision Lead',
+      role: 'Former Founder + CFO',
       bio: 'Leading the mission to make cryptocurrency transparent, accessible, and honest for Nigerians.',
-      initial: 'V',
+      initial: 'R',
       color: 'bg-blue-600'
     },
     {
       name: 'Johnson John',
-      role: 'Lead Developer & Tech',
+      role: 'Lead Developer',
       bio: 'Engineering the Bluechip platform, data integrations, and security verification tools.',
-      initial: 'A',
+      initial: 'J',
       color: 'bg-indigo-600'
     },
     {
       name: 'Victoria Shima',
-      role: 'Community Manager',
-      bio: 'Fostering safe community spaces and organizing educational workshops across Nigeria.',
-      initial: 'T',
+      role: 'Community + Social Media',
+      bio: 'Fostering safe community spaces and sharing practical education without hype or jargon.',
+      initial: 'V',
       color: 'bg-emerald-600'
-    },
-    {
-      name: 'Victoria Shima',
-      role: 'Social-Media Manager',
-      bio: 'Communicating market trends, security warnings, and updates without hype or jargon.',
-      initial: 'C',
-      color: 'bg-amber-600'
-    },
-    {
-      name: 'Ridwan Yusuf',
-      role: 'Chief Financial Officer (CFO)',
-      bio: 'Overseeing liquidity, exchange settlements, and responsible financial risk management.',
-      initial: 'E',
-      color: 'bg-rose-600'
     }
   ];
 
